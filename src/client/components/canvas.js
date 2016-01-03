@@ -54,7 +54,7 @@ class Canvas {
       this.canvas.setAttribute('height', this.canvas.offsetHeight);
       this.canvas.setAttribute('width', this.canvas.offsetWidth);
 
-      console.log('WHAT I GOT TO WORK WITH', this.state.grid);
+      // console.log('WHAT I GOT TO WORK WITH', this.state.grid);
       this._drawTiles(imageObj);
     };
 
@@ -121,7 +121,6 @@ class Canvas {
   }
 }
 
-// // HOLY SHIT THIS WORKS
 // var canvas = document.querySelector("canvas"),
 //     ctx = canvas.getContext("2d"),
 //     w = canvas.width,
