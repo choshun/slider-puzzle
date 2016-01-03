@@ -19,12 +19,13 @@ class GridLogic {
     // assume emptyTile is the last tile.
     this.emptyTile = [this.gridSize - 1, this.gridSize - 1];
     this.allowableMoves;
+    this.shuffleMoves;
     this.lastDirection;
   }
 
   init() {
     this.goalGrid = this._createGrid(this.gridSize);
-    this.shuffledGrid = this._shuffle(this.goalGrid, this.state.shuffleTimes);
+    this.shuffledGrid = this._shuffle(this.goalGrid.slice(), this.state.shuffleTimes);
   }
 
   _createGrid(gridSize) {
@@ -96,11 +97,15 @@ class GridLogic {
           direction = this.getDirection(verticleOffset, 'y');
         }
         
+        allowableMoves.push([grid[tile], direction, tile]);
+
+
+        // TODO: this should ONLY be used on init shuffle, need it, it helps quite a bit :(
         // if we just moved left, we don't want to move right
-        if (direction !== this.getOppositeDirection()[this.lastDirection]) {
-          // push to fringe
-          allowableMoves.push([grid[tile], direction, tile]);
-        }
+        // if (direction !== this.getOppositeDirection()[this.lastDirection]) {
+        //   // push to fringe
+        //   allowableMoves.push([grid[tile], direction, tile]);
+        // }
       }
     }
 
@@ -127,7 +132,7 @@ class GridLogic {
     grid[tile] = this.emptyTile;
     this.emptyTile = fromPosition;
 
-    console.log('EMPTY?', this.emptyTile);
+    // console.log('EMPTY?', this.emptyTile);
 
     return grid;
   }
