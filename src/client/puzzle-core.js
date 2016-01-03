@@ -22,6 +22,11 @@ import Solver from './components/solver';
     ]
   }
 
+  // TODO ok, put allowable in application, call it find fringe, sounds fancier
+  // have move in app, but define and assign it in here, core.
+
+  // remember, last move is assigned somewhere weird in gridlogic
+
   // TODO Not liking the dependancies
   // maybe have allowable moves in global-state, and just call it 
   // application? Maybe also move... have move be the only custom
@@ -42,14 +47,25 @@ import Solver from './components/solver';
 
   // TODO maybe not do init, and just fire them directly so 
   // it's easier to read?
+
   // Paint the sliding puzzle using global state's shuffled grid
   canvas.init();
 
   // Get ready to solve
   solver.init();
 
+  // bind solve
+  // maybe only share global state explicitly? like this?
+  // so components don't need to maintain global state internaly.
+  solver.solveButton.addEventListener('click', (event) => {
+    // console.log('GRID', globalState.state.grid);
+    // console.log('GOAL', globalState.state.goalGrid);
+    solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
+  });
+
+
   //wire canvas to click, and inject allowable moves
-  // canvas.appElement.on('click', function() {
+  // ie canvas.appElement.on('click', function() {
     // canvas.move (which triggers gridlogic.move?)
   //}); 
 })();
