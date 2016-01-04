@@ -13,7 +13,7 @@ import Solver from './components/solver';
 
   var initialState = {
     gridSize: 3,
-    shuffleTimes: 1,
+    shuffleTimes: 20,
     canvas: [
       {
         'image': '/images/sc4a.jpg',

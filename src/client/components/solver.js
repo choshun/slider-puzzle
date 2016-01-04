@@ -27,6 +27,10 @@ class Solver {
     this.generation = 0;
     this.solveButton = document.querySelector('.solve-button');
     this.fringeGrids = []; // 
+    this.emptyFringeTile;
+
+    // for testing
+    this.steps = 0;
   }
 
   init() {
@@ -34,34 +38,73 @@ class Solver {
   }
 
   solve(grid, goalGrid, emptyTile) {
-    if (this._isSameArray(grid, goalGrid)) {
-      console.log('WE DID IT');
+    this.steps++;
+
+    if (this.steps > 100) {
+      console.log('sad trombone', this.fringeGrids);
 
       return;
     }
 
+    // console.log('EMPTY?', emptyTile);
+
+    if (this._isSameArray(grid, goalGrid)) {
+      console.log('WE DID IT IN ' + this.steps);
+
+      return;
+    }
+
+    this.emptyFringeTile = emptyTile;
+
     var fringe = this.gridLogic.getAllowableMoves(emptyTile, grid),
         rank;
-    
-    fringe.forEach((fringe, index) => {
+      
+    fringe.forEach((fringe, index) => {  
       // TODO a bit not dry with the gridLogic shuffle move thing
-      var fringeGrid = this._makeGrid(fringe, grid.slice(), emptyTile);
+      var fringed = this._makeGrid(fringe, grid.slice(), this.emptyFringeTile),
+          fringeGrid = fringed.grid,
+          emptyTile = fringed.emptyTile;
 
-      this.fringeGrids.push(fringeGrid);
+      // console.log(fringed, fringeGrid, emptyTile);
 
       rank = this._algorithm(fringeGrid, goalGrid, this.generation);
 
-      console.log('RANK', rank); 
+      this.fringeGrids.push({
+        'grid': fringeGrid,
+        'rank': rank,
+        'emptyTile': emptyTile
+      });
+
+      console.log('RANK', rank);
+      // console.log('RANK', rank, this.fringeGrids); 
     });
 
+
+
     this.generation++;
+
+    var ordered = this._order(this.fringeGrids, 'rank');
+    
+    console.log('WINNER', ordered[0].rank);
+
+    // console.log('ordered!', ordered);
 
     // get fringe with
     // allowable moves
     // then gridLogic.move(emptyTile, tile), actually move internally, no need to touch DOM
     // then hueristics - generation + rectilinear + tiles out of place
-    // TODO - how will I trigger canvas move?
+    // TODO - how will I trigger canvas move? .. you wont! 
     // compare then repeat
+
+    /*
+      what's a good object for this,
+      I need
+      emptyTile, 
+      grid,
+      rank
+    */
+
+    this.solve(ordered[0].grid, goalGrid, ordered[0].emptyTile);
   }
 
   _isSameArray(array1, array2) {
@@ -80,8 +123,14 @@ class Solver {
 
     grid.forEach((tile, index) => {
       distance = (Math.abs(tile[0] - goalGrid[index][0]) + Math.abs(tile[1] - goalGrid[index][1]));
+      
+      // quick check for another hueristic, all values are identical :(
+      if (distance !== 0) {
+        totalDistance += 1;
+      }
+
       totalDistance += distance;
-      console.log('in grid array', tile, goalGrid[index], index, distance);
+      // console.log('in grid array', tile, goalGrid[index], index, distance);
     });
 
     return totalDistance;
@@ -90,35 +139,26 @@ class Solver {
   // TODO should either be global or in gridLogic
   _makeGrid(fringe, grid, emptyTile) {
     var tile = fringe[2];
-    grid[tile] = emptyTile;
 
-    console.log('FRINGED!', fringe);
+    // console.log('WHY UNDEFINED?', fringe, emptyTile);
+
+    var fromPosition = grid[tile];
+    grid[tile] = emptyTile;
+    // emptyTile = fromPosition;
+    // console.log('FRINGED!', fringe);
     // console.log(tile, grid, emptyTile);
 
-    return grid;
+    return {
+      'grid': grid,
+      'emptyTile': fromPosition
+    };
+  }
+
+  _order(array, key) {
+    return array.sort((a, b) => {
+      return a[key] - b[key]
+    });
   }
 }
-
-
-var generation = 0;
-
-function getGeneration() {
-  return generation;
-}
-
-// function getDistance() {
-//   var origCol, 
-//       origRow, 
-//       _ref;
-
-//   _ref = originalPosition(num);
-//   origRow = _ref[0];
-//   origCol = _ref[1];
-  
-//   return Math.abs(origRow - curRow) + Math.abs(origCol - curCol);
-// }
-
-//after loop
-generation++;
 
 export default Solver;
