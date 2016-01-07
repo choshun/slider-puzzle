@@ -24,10 +24,10 @@ import Solver from './components/solver';
 
   var initialState = {
     gridSize: 3,
-    shuffleTimes: 2,
+    shuffleTimes: 10000,
     canvas: [
       {
-        'image': '/images/sc4a.jpg',
+        'image': '/images/cat.jpg',
         'name': 'test1'
       }
     ]
@@ -77,8 +77,8 @@ import Solver from './components/solver';
 
   // move
   canvas.appElement.addEventListener('click', (event) => {
+    // var moves = solver
     canvas.moveTile(event);
-    
   });
 
 
