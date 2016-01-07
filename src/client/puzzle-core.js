@@ -77,8 +77,10 @@ import Solver from './components/solver';
 
   // move
   canvas.appElement.addEventListener('click', (event) => {
-    // var moves = solver
-    canvas.moveTile(event);
+    var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid);
+    
+    console.log('MOVES', moves);
+    canvas.moveTile(event, moves);
   });
 
 

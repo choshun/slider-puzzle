@@ -10,20 +10,29 @@ class Canvas {
   constructor(globalState) {
     this.globalState = globalState;
     this.state = globalState.state || {};
+
+    // Canvas stuff
     this.appElement = document.getElementById('app');
     this.canvas = this._createCanvas();
     this.context = this.canvas.getContext('2d');
-    this.gridSize = this.state.gridSize;
     this.imageObj;
 
     // For animation
     this._iteration = 0,
     this._totalIterations = 10;
 
+    // For canvas grid
+    this.gridSize = this.state.gridSize;
     this._width = this.canvas.offsetWidth,
     this._height = this.canvas.offsetHeight;
-    this._tileWidth = this._width / this.gridSize,
+    this._tileWidth = this._width / this.gridSize;
     this._tileHeight = this._height / this.gridSize;
+    this._directionLookup = {
+      'UP': - 1,
+      'DOWN': + 1,
+      'LEFT': - 1,
+      'RIGHT': + 1,
+    }
   }
 
   init() {
@@ -31,13 +40,18 @@ class Canvas {
     this._loadImage('test');
   }
 
-  moveTile(event) {
+  moveTile(event, moves) {
     var offsetX = event.layerX - this.canvas.offsetLeft,
         offsetY = event.layerY - this.canvas.offsetTop;
 
     var tile = this._getTile(offsetX, offsetY);
+    var nextMove = this._getValidMove(tile, moves);
 
-    this._redrawMovedTile(tile);
+    if (nextMove !== false) {
+      this._redrawMovedTile(tile, nextMove);
+    }
+
+    return nextMove;
   }
 
   _getTile(offsetX, offsetY) {
@@ -60,6 +74,23 @@ class Canvas {
     }
 
     return -1;
+  }
+
+  _getValidMove(tile, moves) {
+    var tiledMoved = tile[2],
+        validTile,
+        nextMove = false;
+
+    moves.forEach((move) => {
+      validTile = move[2];
+
+      if (tiledMoved === validTile) {
+        nextMove = move;
+        return;
+      }
+    });
+
+    return nextMove;
   }
 
   _createCanvas() {
@@ -137,8 +168,20 @@ class Canvas {
     this.context.fill();
   }
 
-  _redrawMovedTile(selectedTile) {
-    var easingValue = this._easeInOutQuad(this._iteration, 0, this._tileHeight, this._totalIterations);
+  _redrawMovedTile(selectedTile, nextMove) {
+    var easingValue,
+        direction = nextMove[1],
+        easingY = 0,
+        easingX = 0;
+
+    if (direction === 'UP' || direction === 'DOWN') {
+      easingValue = this._easeInOutQuad(this._iteration, 0, this._tileHeight, this._totalIterations);
+      easingY = this._directionLookup[direction] * easingValue;
+    } else {
+      easingValue = this._easeInOutQuad(this._iteration, 0, this._tileWidth, this._totalIterations);
+      easingX = this._directionLookup[direction] * easingValue;
+    }
+
     this.context.closePath();
 
     this.context.clearRect(
@@ -153,14 +196,14 @@ class Canvas {
       this._tileHeight * this.state.goalGrid[selectedTile[2]][1], // tile bg position y
       this._tileWidth,
       this._tileHeight,
-      this._tileWidth * selectedTile[0], // tile position x
-      this._tileHeight * selectedTile[1] - easingValue, // tile position x
+      this._tileWidth * selectedTile[0] + easingX, // tile position X
+      this._tileHeight * selectedTile[1] + easingY, // tile position Y
       this._tileWidth,
       this._tileHeight);
-  
+
     if (this._iteration < this._totalIterations) {
       this._iteration++;
-      requestAnimationFrame(() => this._redrawMovedTile(selectedTile));
+      requestAnimationFrame(() => this._redrawMovedTile(selectedTile, nextMove));
     } else {
       this._iteration = 0;
     }
