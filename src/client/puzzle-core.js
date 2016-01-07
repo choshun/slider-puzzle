@@ -1,3 +1,14 @@
+// only import public methods, not whole objects. see es6 destructuring
+
+// 1/6/16 TODO
+// move
+//  get canvas to move
+//    translate e.pagex/y to tiles
+//    fire move on allowable tiles
+//    move to correct tile
+//  get grid to update
+//  * make cursor:pointer on things that can move
+
 require('./puzzle-core.scss');
 
 import GlobalState from './components/global-state';
@@ -13,14 +24,14 @@ import Solver from './components/solver';
 
   var initialState = {
     gridSize: 3,
-    shuffleTimes: 20,
+    shuffleTimes: 2,
     canvas: [
       {
         'image': '/images/sc4a.jpg',
         'name': 'test1'
       }
     ]
-  }
+  };
 
   // TODO ok, put allowable in application, call it find fringe, sounds fancier
   // have move in app, but define and assign it in here, core.
@@ -61,6 +72,13 @@ import Solver from './components/solver';
     // console.log('GRID', globalState.state.grid);
     // console.log('GOAL', globalState.state.goalGrid);
     solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
+    console.log('OPEN GRIDS', solver.openGrids, 'CLOSED', solver.closedGrids);
+  });
+
+  // move
+  canvas.appElement.addEventListener('click', (event) => {
+    canvas.moveTile(event);
+    
   });
 
 
@@ -69,3 +87,4 @@ import Solver from './components/solver';
     // canvas.move (which triggers gridlogic.move?)
   //}); 
 })();
+
