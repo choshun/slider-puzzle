@@ -23,7 +23,7 @@ import Solver from './components/solver';
                           window.msRequestAnimationFrame;
 
   var initialState = {
-    gridSize: 3,
+    gridSize: 5,
     shuffleTimes: 10000,
     canvas: [
       {
