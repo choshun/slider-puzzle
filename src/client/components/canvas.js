@@ -14,10 +14,11 @@ class Canvas {
     this.canvas = this._createCanvas();
     this.context = this.canvas.getContext('2d');
     this.gridSize = this.state.gridSize;
-    
+    this.imageObj;
+
     // For animation
     this._iteration = 0,
-    this._totalIterations = 40;
+    this._totalIterations = 20;
 
     this._width = this.canvas.offsetWidth,
     this._height = this.canvas.offsetHeight;
@@ -28,6 +29,19 @@ class Canvas {
   init() {
     // paint 
     this._loadImage('test');
+  }
+
+  moveTile(event) {
+    var offsetX = event.layerX - this.canvas.offsetLeft,
+        offsetY = event.layerY - this.canvas.offsetTop;
+
+    var tile = this.getTile(offsetX, offsetY);
+
+    console.log(tile);
+
+    console.log('X, Y', offsetX, offsetY);
+
+    this._drawTiles(this.imageObj, true, tile);
   }
 
   _createCanvas() {
@@ -46,78 +60,109 @@ class Canvas {
   }
 
   _loadImage(image) {
-    var imageObj = new Image();
+    this.imageObj = new Image();
 
-    imageObj.onload = () => {
+    this.imageObj.onload = () => {
       var cover = this._width > this._height ? this._width : this._height;
 
       this.canvas.setAttribute('height', this.canvas.offsetHeight);
       this.canvas.setAttribute('width', this.canvas.offsetWidth);
 
       // console.log('WHAT I GOT TO WORK WITH', this.state.grid);
-      this._drawTiles(imageObj);
+      this._drawTiles(this.imageObj, false);
     };
 
-    imageObj.src = this.state.canvas[0].image;
+    this.imageObj.src = this.state.canvas[0].image;
   }
 
-  _drawTiles(imageObj) {
+  _drawTiles(imageObj, draw, selectedTile) {
     var i = 0,
         j = 0,
-        count = 0;
+        count = 0,
+        position = selectedTile !== undefined ? selectedTile[1] : false;
 
-    this.context.font="30px Helvetica";
-    this.context.fillStyle="#ff00ff";
+    console.log('selected tile not undefined?', selectedTile, 'POSITION', position);
+
+    this.context.font = "30px Helvetica";
+    this.context.fillStyle = "#ff00ff";
 
     //this.context.fillText(count, 50, 50);
 
     //this.context.drawImage(imageObj, this._tileWidth * placementX, this._tileHeight * placementY, this._tileWidth, this._tileHeight,  this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight);
     for (j = 0; j < this.gridSize; j++) {
       for (i = 0; i < this.gridSize; i++) {
-        
+        var tile,
+            placementX,
+            placementY;
+
+
         if (count < this.state.grid.length) {
           this.context.beginPath();
           this.context.stroke();
           
-          var tile = this.state.grid[count],
-              placementX = tile[0],
-              placementY = tile[1];
-
+          tile = this.state.grid[count];
+            placementX = tile[0],
+            placementY = tile[1];
 
           // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
           // mask then placement
-          this.context.drawImage(imageObj, this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight,  this._tileWidth * placementX, this._tileHeight * placementY, this._tileWidth, this._tileHeight);
-          this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
-          // this.context.clearRect(this._tileWidth * this.state.emptyTile[0], this._tileHeight * this.state.emptyTile[1], this._tileWidth, this._tileHeight);
+          // if (selectedTile !== true) {
+            this.context.drawImage(this.imageObj, this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight,  this._tileWidth * placementX, this._tileHeight * placementY, this._tileWidth, this._tileHeight);
+            this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
+          //}
+          
+          
+
         }
+
+        // this.context.clearRect(this._tileWidth * this.state.emptyTile[0], this._tileHeight * this.state.emptyTile[1], this._tileWidth, this._tileHeight);
+          if (selectedTile !== undefined && i === position[0] && j === position[1]) {
+            var easingValue = this._easeInOutQuad(this._iteration, 0, this._tileHeight, this._totalIterations);
+
+            // console.log('frame', easingValue, this._iteration);
+            this.context.closePath();
+
+            // this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.context.clearRect(this._tileWidth * position[0],
+                                  this._tileHeight * position[1],
+                                  this._tileWidth,
+                                  this._tileHeight);
+
+            this.context.drawImage(this.imageObj,
+                                  this._tileWidth * i,
+                                  this._tileHeight * j,
+                                  this._tileWidth,
+                                  this._tileHeight,
+                                  this._tileWidth * position[0],
+                                  this._tileHeight * position[1] - easingValue,
+                                  this._tileWidth,
+                                  this._tileHeight);
+          } 
         
-
-        // if (i === 1 && j === 1) {
-        //   this.context.drawImage(imageObj, 200, 300, this._tileWidth, this._tileHeight, this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight);
-        // } else if (i === 2 && j === 2) {
-        //   var easingValue = this._easeInOutQuad(this._iteration, 0, this._tileHeight, this._totalIterations);
-
-        //   // console.log('frame', easingValue, this._iteration);
-        //   this.context.closePath();
-        //   this.context.clearRect(this._tileWidth * i, this._tileHeight * j, 500, 500);
-
-        //   this.context.drawImage(imageObj, this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight,  this._tileWidth * i, this._tileHeight * j - easingValue, this._tileWidth, this._tileHeight);
-        // } else {
-        // this.context.drawImage(imageObj, this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight,  this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight);
-        // }
+        
 
         count++;
       }
     }
 
-    // if (this._iteration < this._totalIterations) {
-    //   this._iteration++;
-    //   requestAnimationFrame(() => this._drawTiles(imageObj))
-    // } else {
-    //   this._iteration = 0;
-    // }
+    if (this._iteration < this._totalIterations) {
+      this._iteration++;
+      requestAnimationFrame(() => this._drawTiles(this.imageObj, draw, selectedTile));
+    } else {
+      this._iteration = 0;
+    }
 
     this.context.fill();
+  }
+
+  getTile(offsetX, offsetY) {
+    var left = Math.floor(offsetX / this._tileWidth),
+        top = Math.floor(offsetY / this._tileHeight),
+        tile = left + (top * this.gridSize);
+    
+    console.log('TOP', top, 'LEFT', left);
+
+    return [tile, [left, top]]; // return tile for grid logic, top and left for canvas
   }
 }
 
