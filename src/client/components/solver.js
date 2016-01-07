@@ -45,7 +45,7 @@ class Solver {
   solve(grid, goalGrid, emptyTile) {
     this.steps++;
 
-    if (this.steps > 3) {
+    if (this.steps > 100) {
       // console.log('sad trombone', 'OPEN', this.openGrids, 'CLOSED', this.closedGrids);
 
       return;
@@ -53,7 +53,9 @@ class Solver {
 
     // console.log('EMPTY?', emptyTile);
 
-    if (this._isSameArray(grid, goalGrid)) {
+    // console.log('GRID PREARED FOR IS SAME', grid);
+
+    if (this._isSameArray(grid, this.state.goalGrid)) {
       console.log('WE DID IT IN ' + this.steps);
 
       return;
@@ -61,95 +63,30 @@ class Solver {
 
     this.emptyFringeTile = emptyTile;
 
-    this._makeFringe(emptyTile, grid, goalGrid);
+    // TODO!!! am assigning an array, when I should push items
 
-    // START GET FRINGE AND ADD TO OPEN
-    // var fringe = this.gridLogic.getAllowableMoves(emptyTile, grid),
-    //     rank;
-
-    // fringe.forEach((fringe, index) => {
-    //   // TODO a bit not dry with the gridLogic shuffle move thing
-    //   var fringed = this._makeGrid(fringe, grid.slice(), this.emptyFringeTile),
-    //       fringeGrid = fringed.grid,
-    //       emptyTile = fringed.emptyTile;
-
-    //   // console.log(fringed, fringeGrid, emptyTile);
-
-    //   rank = this._evaluation(fringeGrid, goalGrid, this.generation);
-
-    //   // should be this.
-    //   this.openGrids.push({
-    //     'grid': fringeGrid,
-    //     'rank': rank,
-    //     'emptyTile': emptyTile
-    //   });
-
-    //   // console.log('PUSH!');
-
-    //   // console.log('RANK', rank);
-    //   // console.log('RANK', rank, this.openGrids); 
-    // });
-    // END GET FRINGE AND ADD TO OPEN
+    this.openGrids = this.makeFringe(emptyTile, grid, goalGrid);
 
     // THIS DUN WORK
     this.generation++;
 
     this.openGrids = this._order(this.openGrids, 'rank');
     
-    // console.log('OPEN GRIDS', this.openGrids);
-
-    // console.log('WINNER', ordered[0].rank);
-
-    // console.log('ordered!', ordered);
-
-    // get fringe with
-    // allowable moves
-    // then gridLogic.move(emptyTile, tile), actually move internally, no need to touch DOM
-    // then hueristics - generation + rectilinear + tiles out of place
-    // TODO - how will I trigger canvas move? .. you wont! 
-    // compare then repeat
-
-    /*
-      what's a good object for this,
-      I need
-      emptyTile, 
-      grid,
-      rank
-    */
-
-    // if (this.generation < 4) {
-    //   this.openGrids.forEach((grid, index) => {
-        
-    // console.log('OPEN', this.openGrids, 'CLOSED', this.closedGrids);
-
-    //     //
-    //   });
-    // }
-
-
-    // TODO: solve all the numbers that equal a lower bound
-    // generation needs to stay the same for sibling trees
-
     // TODO: I might need moves made in number, and actual "moves" made to solve in object
     // once I have winning object we're good, don't need nothing else.
     
-    //var lowest = this._getLowestRanks(this.openGrids, goalGrid);
-    
-    //console.log('LOWEST', lowest);
+    // console.log('OPEN GRIDS', this.openGrids);
 
-    // lowest.forEach((grid, index) => {
-    //   console.log('I SUCK');
-    //   this.solve(grid, goalGrid, grid.emptyTile);
-    // });
-    
-    console.log('OPEN GRIDS', this.openGrids);
+    this.solve(this.openGrids[0].grid, goalGrid, this.openGrids[0].emptyTile);
 
-    this.openGrids.forEach((grid) => {
-      this.solve(grid.grid, goalGrid, grid.emptyTile);
-      this.closedGrids.push(this.openGrids.shift()); 
+    // this.openGrids.forEach((candidate, index) => {
+    //   console.log('grids to sove?', candidate);
+
+    //   this.solve(candidate[1], this.state.goalGrid, candidate[0]);
+    //   // this.closedGrids.push(this.openGrids.shift()); 
       
-      console.log('SHIFT!'); 
-    });
+    //   console.log('SHIFT!'); 
+    // });
   }
 
   // @TODO!!! just make children, pass in move and increment by one, maybe have it in object
@@ -158,9 +95,10 @@ class Solver {
 
   // DO NOT loop through everything, trust the queue, just make fucking children here
   // need to make path a string to compare, with a length, an array I guess, use isSameArray
-  _makeFringe(emptyTile, grid, goalGrid) {
+  makeFringe(emptyTile, grid, goalGrid) {
     var fringe = this.gridLogic.getAllowableMoves(emptyTile, grid),
-        rank;
+        rank,
+        frontier = [];
 
     fringe.forEach((fringe, index) => {
       // TODO a bit not dry with the gridLogic shuffle move thing
@@ -172,59 +110,24 @@ class Solver {
 
       rank = this._evaluation(fringeGrid, goalGrid, this.generation);
 
-      // should be this.
-      this.openGrids.push({
+
+
+      frontier.push({
         'grid': fringeGrid,
         'rank': rank,
         'emptyTile': emptyTile
       });
-
-      // console.log('PUSH!');
-
-      // console.log('RANK', rank);
-      // console.log('RANK', rank, this.openGrids); 
-    });
-  }
-
-  _getLowestRanks(grids, goalGrid) {
-    var lowestRank = grids[0].rank;
-
-    var candidates = [];
-
-    console.log('LOWEST RANK', lowestRank, grids);
-
-    grids.forEach((grid, index) => {
-      // console.log('GRID RANK', grid.rank);
-
-      if (grid.rank === lowestRank) {
-        // this.openGrids.push(grid);
-        // console.log('same rank');
-        candidates.push(grid);
-        
-        // console.log('CANDIDATES', candidates);
-
-        //this.solve(candidates[index].grid, goalGrid, candidates[index].emptyTile);
-
-      } else {
-        // this.openGrids.push(grid);
-        // this.solve(candidates[0].grid, goalGrid, candidates[0].emptyTile);
-      }
-
-      
-
-      // console.log('UNIQUE RANK?', grid.rank);
-      // console.log('boop');
     });
 
-    this.generation++;
+    console.log('FRINGE', frontier);
 
-    return candidates;
-    // this.openGrids = this._order(this.openGrids, 'rank');
+    return frontier;
   }
 
-  _isSameArray(array1, array2) {
-    return (array1.length === array2.length) && array1.every((element, index) => {
-      return element === array2[index]; 
+  _isSameArray(grid, targetGrid) {
+    // console.log('GRID?', grid, 'TARGET?', targetGrid);
+    return (grid.length === targetGrid.length) && grid.every((element, index) => {
+      return element === targetGrid[index]; 
     });
   }
 
