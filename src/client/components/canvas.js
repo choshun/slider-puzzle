@@ -37,11 +37,30 @@ class Canvas {
 
     var tile = this.getTile(offsetX, offsetY);
 
-    console.log(tile);
-
-    console.log('X, Y', offsetX, offsetY);
-
     this._drawTiles(this.imageObj, true, tile);
+  }
+
+  getTile(offsetX, offsetY) {
+    var left = Math.floor(offsetX / this._tileWidth),
+        top = Math.floor(offsetY / this._tileHeight);
+
+    var origTile = this._findArraysIndex(this.state.grid, [left, top]);
+
+    // console.log('TOP', top, 'LEFT', left, 'ORIGTILE', origTile, [left, top]);
+
+    return [left, top, origTile]; // return tile for grid logic, top and left for canvas
+  }
+
+  _findArraysIndex(arrays, array){
+    var i = 0,
+        n = arrays.length;
+
+    for (; i < n; i++) {
+      if (array[0] === arrays[i][0] && array[1] === arrays[i][1]) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   _createCanvas() {
@@ -78,44 +97,61 @@ class Canvas {
   _drawTiles(imageObj, draw, selectedTile) {
     var i = 0,
         j = 0,
-        count = 0,
-        position = selectedTile !== undefined ? selectedTile[1] : false;
+        count = 0;
 
-    console.log('selected tile not undefined?', selectedTile, 'POSITION', position);
+    // console.log('selected tile not undefined?', selectedTile, 'POSITION', position);
 
     this.context.font = "30px Helvetica";
     this.context.fillStyle = "#ff00ff";
-
-    //this.context.fillText(count, 50, 50);
 
     //this.context.drawImage(imageObj, this._tileWidth * placementX, this._tileHeight * placementY, this._tileWidth, this._tileHeight,  this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight);
     for (j = 0; j < this.gridSize; j++) {
       for (i = 0; i < this.gridSize; i++) {
         var tile,
             placementX,
-            placementY;
+            placementY,
+            originalX,
+            originalY;
 
 
         if (count < this.state.grid.length) {
           this.context.beginPath();
           this.context.stroke();
           
+          // tile[0] is upperleft tile, it contains it's x, y in grid. 
+          // Could be shuffled, ie tile[0] is [1, 1], which means the upperleft part 
+          // of the original pic is now at 1 tile to the right, 1 tile down 
           tile = this.state.grid[count];
-            placementX = tile[0],
-            placementY = tile[1];
+          placementX = tile[0];
+          placementY = tile[1];
+          
+          // this keeps track of the original offset for the bg's when moving.
+          // if I click [1, 1], I need to know what the mask originally was,
+          // so if I clock tile[0] (upper left orginally), but it's at [2, 2], 
+          // I need the moving tile at 2, 2, to have a bg offset of 0, 0
+          originalX = i;
+          originalY = j;
 
           // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
           // mask then placement
           // if (selectedTile !== true) {
-            this.context.drawImage(this.imageObj, this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight,  this._tileWidth * placementX, this._tileHeight * placementY, this._tileWidth, this._tileHeight);
-            this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
+            this.context.drawImage(this.imageObj,
+                                  this._tileWidth * i, // tile bg position x
+                                  this._tileHeight * j, // tile bg position y
+                                  this._tileWidth,
+                                  this._tileHeight,
+                                  this._tileWidth * placementX, // tile position x
+                                  this._tileHeight * placementY, // tile position y
+                                  this._tileWidth, this._tileHeight);
+            
           //}
           
           
 
         }
 
-        // this.context.clearRect(this._tileWidth * this.state.emptyTile[0], this._tileHeight * this.state.emptyTile[1], this._tileWidth, this._tileHeight);
+        // new function here called move, or redraw moved tile
+        var position = selectedTile !== undefined ? selectedTile : false;
           if (selectedTile !== undefined && i === position[0] && j === position[1]) {
             var easingValue = this._easeInOutQuad(this._iteration, 0, this._tileHeight, this._totalIterations);
 
@@ -128,18 +164,22 @@ class Canvas {
                                   this._tileWidth,
                                   this._tileHeight);
 
+            console.log('origTile?', position[2], 'position?', position[0], position[1], 'TILE?', tile, 'shuffled grid?', this.state.grid);
+
+
             this.context.drawImage(this.imageObj,
-                                  this._tileWidth * i,
-                                  this._tileHeight * j,
+                                  this._tileWidth * this.state.goalGrid[position[2]][0], // tile bg position x
+                                  this._tileHeight * this.state.goalGrid[position[2]][1], // tile bg position y
                                   this._tileWidth,
                                   this._tileHeight,
-                                  this._tileWidth * position[0],
-                                  this._tileHeight * position[1] - easingValue,
+                                  this._tileWidth * position[0], // tile position x
+                                  this._tileHeight * position[1] - easingValue, // tile position x
                                   this._tileWidth,
                                   this._tileHeight);
           } 
         
         
+        this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
 
         count++;
       }
@@ -153,16 +193,6 @@ class Canvas {
     }
 
     this.context.fill();
-  }
-
-  getTile(offsetX, offsetY) {
-    var left = Math.floor(offsetX / this._tileWidth),
-        top = Math.floor(offsetY / this._tileHeight),
-        tile = left + (top * this.gridSize);
-    
-    console.log('TOP', top, 'LEFT', left);
-
-    return [tile, [left, top]]; // return tile for grid logic, top and left for canvas
   }
 }
 
