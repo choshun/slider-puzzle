@@ -40,14 +40,17 @@ class Canvas {
     this._loadImage('test');
   }
 
+  // thinking I may need to expose redrawMovedTile
   moveTile(event, moves) {
     var offsetX = event.layerX - this.canvas.offsetLeft,
         offsetY = event.layerY - this.canvas.offsetTop;
 
     var tile = this._getTile(offsetX, offsetY);
+    // maybe just get direction? (tile, direction) seems more understandable
     var nextMove = this._getValidMove(tile, moves);
 
     if (nextMove !== false) {
+      // may need to expose this when solving
       this._redrawMovedTile(tile, nextMove);
     }
 
@@ -59,7 +62,7 @@ class Canvas {
         top = Math.floor(offsetY / this._tileHeight);
 
     var origTile = this._findArraysIndex(this.state.grid, [left, top]);
-
+    
     return [left, top, origTile]; //return tile for grid logic, top and left for canvas
   }
 
