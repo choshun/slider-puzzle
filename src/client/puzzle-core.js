@@ -1,13 +1,17 @@
-// only import public methods, not whole objects. see es6 destructuring
+// - only import public methods, not whole objects. see es6 destructuring
+// - stuff like next move and canvas stuff might be good to be objects
+//   ie, nextMoveTile = nextMove[2] is kinda vague
 
 // 1/6/16 TODO
 // move
-//  get canvas to move
-//    translate e.pagex/y to tiles
-//    fire move on allowable tiles
-//    move to correct tile
+//  get canvas to move - DONE!
+//    translate e.pagex/y to tiles - DONE!
+//    fire move on allowable tiles - DONE!
+//    move to correct tile - DONE!
 //  get grid to update
 //  * make cursor:pointer on things that can move
+
+
 
 require('./puzzle-core.scss');
 
@@ -77,16 +81,28 @@ import Solver from './components/solver';
 
   // move
   canvas.appElement.addEventListener('click', (event) => {
+    // get allowable moves from current grid state
     var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid);
     
-    console.log('MOVES', moves);
-    canvas.moveTile(event, moves);
+    // if the tile clicked is allowable, return move, else false
+    var nextMove = canvas.moveTile(event, moves);
+    
+    // move
+    if (nextMove !== false) {
+      // update grid
+      var nextMovePosition = nextMove[0],
+          nextMoveTile = nextMove[2];
+
+      // TODO: Again not DRY, used in gridlogic and solver
+      // START should be a global function passed into stuff that needs it
+      var toPosition = globalState.state.emptyTile;
+
+      globalState.state.emptyTile = nextMovePosition;
+      globalState.state.grid[nextMoveTile] = toPosition;
+      // END should be a global function passed into stuff that needs it
+    }
+
+    console.log('NEXT', nextMove);
   });
-
-
-  //wire canvas to click, and inject allowable moves
-  // ie canvas.appElement.on('click', function() {
-    // canvas.move (which triggers gridlogic.move?)
-  //}); 
 })();
 
