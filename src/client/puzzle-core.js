@@ -30,15 +30,15 @@ import Canvas from './components/canvas';
 import GridLogic from './components/grid-logic';
 import Solver from './components/solver';
 
-(function() {
+(() => {
   requestAnimationFrame = window.requestAnimationFrame ||
                           window.mozRequestAnimationFrame ||
                           window.webkitRequestAnimationFrame ||
                           window.msRequestAnimationFrame;
 
   var initialState = {
-    gridSize: 3,
-    shuffleTimes: 20,
+    gridSize: 4,
+    shuffleTimes: 30,
     canvas: [
       {
         'image': '/images/cat.jpg',
@@ -77,7 +77,7 @@ import Solver from './components/solver';
   canvas.init();
 
   // Get ready to solve
-  solver.init();
+  solver.init(globalState.state);
 
   // bind solve
   // maybe only share global state explicitly? like this?
@@ -90,6 +90,7 @@ import Solver from './components/solver';
     if (solver.solution !== undefined) {
       var moveCount = 0;
 
+      // TODO: put into function
       solveInterval = setInterval(() => {
         
         if (moveCount >= solver.solution.length) {
@@ -105,15 +106,10 @@ import Solver from './components/solver';
 
   // move
   canvas.appElement.addEventListener('click', (event) => {
-    // get allowable moves from current grid state
     var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid);
-    
-    // if the tile clicked is allowable, return move, else false
     var nextMove = canvas.moveTile(event, moves);
     
-    // move
     if (nextMove !== false) {
-      // update grid
       var nextMovePosition = nextMove[0],
           nextMoveTile = nextMove[2];
 
