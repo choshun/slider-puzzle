@@ -8,10 +8,20 @@
 //    translate e.pagex/y to tiles - DONE!
 //    fire move on allowable tiles - DONE!
 //    move to correct tile - DONE!
-//  get grid to update
+//  get grid to update, making it way easier to debug -DONE!
 //  * make cursor:pointer on things that can move
-
-
+/**
+// 1/7/16 TODO
+// solve
+//  when you hit solve button, and it's solved, have grid update to solved state - DONE
+//  rewrite solve algorithm to EXACTLY what the innernet said it should be
+//  test for same rank trees, this is where it hangs all the time
+//  make sure solve doesn't fire until final tree is made
+//    right now I add to solver.solved as it loops, this may balloon when
+//    trees expand
+//  put in worker
+//  
+*/
 
 require('./puzzle-core.scss');
 
@@ -27,8 +37,8 @@ import Solver from './components/solver';
                           window.msRequestAnimationFrame;
 
   var initialState = {
-    gridSize: 5,
-    shuffleTimes: 10000,
+    gridSize: 3,
+    shuffleTimes: 20,
     canvas: [
       {
         'image': '/images/cat.jpg',
@@ -73,10 +83,24 @@ import Solver from './components/solver';
   // maybe only share global state explicitly? like this?
   // so components don't need to maintain global state internaly.
   solver.solveButton.addEventListener('click', (event) => {
-    // console.log('GRID', globalState.state.grid);
-    // console.log('GOAL', globalState.state.goalGrid);
+    var solveInterval;
+
     solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
-    console.log('OPEN GRIDS', solver.openGrids, 'CLOSED', solver.closedGrids);
+
+    if (solver.solution !== undefined) {
+      var moveCount = 0;
+
+      solveInterval = setInterval(() => {
+        
+        if (moveCount >= solver.solution.length) {
+          clearInterval(solveInterval);
+          return;
+        }
+
+        canvas.redrawMovedTile(solver.solution[moveCount].tile, solver.solution[moveCount].direction);
+        moveCount++;
+      }, 300);
+    }
   });
 
   // move
