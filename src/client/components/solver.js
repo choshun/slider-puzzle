@@ -16,6 +16,8 @@
  */
 class Solver {
 
+  // TODO!!! empty tile isn't being set correctly sometimes, especially with hard to solve ones
+  // prolly has to do with adding every move to solution (reordered solutions may have different emptyTiles)
   /*
    * @constructs Canvas
    * @param {Object} state options
@@ -29,24 +31,45 @@ class Solver {
     // current new candidates for moving,
     // ordered left best to right worst according to the 
     // evaluation function estimate
-    this.openGrids = [];
+    // this.openGrids = [];
     // keeps track of states already visited
     this.closedGrids = [];
-    this.emptyFringeTile;
+    this.emptyFringeTile; // TODO: should not be a property
     this.solution = [];
+    this.candidate,
+    this.candidates;
+
+    console.log('solver state at init?', this.state);
+
+    // assign starting grid to open grids
 
     // for testing
     this.steps = 0;
   }
 
-  init() {
+  init(state) {
+    this.openGrids = [{
+      'grid': state.grid,
+      'rank': this._evaluation(state.grid, state.goalGrid, this.generation),
+      'emptyTile': state.emptyTile,
+      'direction': 'none', // TODO: hope this doesn't break it
+      'tileMoved': 'none',
+      'tileMovedPosition': 'none'
+    }];
+
+    console.log('INIT openGrids', this.openGrids);
     // this.solve(this.state.grid, this.state.goalGrid, this.state.emptyTile);
   }
 
   solve(grid, goalGrid, emptyTile) {
-    this.steps++;
+    this.steps++; // really needs to be internal to object, especially if we find a faster path
 
-    if (this.steps > 100) {
+    // remove leftmost state and assign to candidate
+    // console.log('OPEN GRID AT START', this.openGrids);
+
+    this.candidate = this.openGrids.shift();
+
+    if (this.steps > 1000) {
       // console.log('sad trombone', 'OPEN', this.openGrids, 'CLOSED', this.closedGrids);
       // this.solution = undefined;
 
@@ -55,8 +78,8 @@ class Solver {
 
     // console.log('GRID PREARED FOR IS SAME', grid);
 
-    if (this._isSameArray(grid, this.state.goalGrid)) {
-      console.log('WE DID IT IN ' + this.steps, this.solution);
+    if (this._isSameArray(this.candidate.grid, this.state.goalGrid)) {
+      console.log('WE DID IT IN ' + this.steps, this.solution.length);
 
       return;
     }
@@ -64,14 +87,46 @@ class Solver {
     // TODO this should be passed explicity
     this.emptyFringeTile = emptyTile;
 
-    // TODO!!! am assigning an array, when I should push items
+    this.candidates = this.makeFringe(emptyTile, this.candidate.grid, goalGrid);
 
-    this.openGrids = this.makeFringe(emptyTile, grid, goalGrid);
+    var isOnOpen,
+        isOnClosed;
+    
+    this.candidates.forEach((candidate) => {
 
-    // THIS DUN WORK
-    this.generation++;
+      // is in open
+      isOnOpen = this.openGrids.some((openGrid) => {
+        return this._isSameArray(candidate.grid, openGrid.grid);
+      });
+
+      // is in closed
+      isOnClosed = this.closedGrids.some((closedGrid) => {
+        return this._isSameArray(candidate.grid, closedGrid.grid);
+      });
+
+      // if the candidate is not on openGrids or ClosedGrids
+      if (!isOnOpen && !isOnClosed) {
+        this.openGrids.push(candidate);
+        
+      }
+
+      // TODO, seems redundant
+      if (isOnClosed) {
+        // this.openGrids.push(candidate);
+        // this.openGrids = this._order(this.openGrids, 'rank').slice(1);
+      }
+    });
 
     this.openGrids = this._order(this.openGrids, 'rank');
+
+    // TODO!!!: THIS DUN WORK
+    this.generation++;
+
+    // TODO!!!: isOnopen...
+
+    // TODO!!!: isonclosed...
+
+    this.closedGrids.push(this.candidate);
     
     // TODO: I might need moves made in number, and actual "moves" made to solve in object
     // once I have winning object we're good, don't need nothing else.
@@ -80,10 +135,13 @@ class Solver {
 
     // for now just best ranked, doesn't consider equal ranked ones
     // AND WE MOVE ON!
-
+    
+    // TODO!!! this should prolly be assigned in openGrid object, and not exposed 
+    // until it's solved
+    // when solved say this.solution this.candidate.solution
     var tile = [this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved];
 
-    console.log('TILE?', tile, this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved);
+    // console.log('TILE?', tile, this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved);
 
     this.solution.push({
       'tile': tile,
@@ -92,24 +150,12 @@ class Solver {
 
     // console.log('SOLUTION', this.solution);
 
-    this.solve(this.openGrids[0].grid, goalGrid, this.openGrids[0].emptyTile);
-
-    // this.openGrids.forEach((candidate, index) => {
-    //   console.log('grids to sove?', candidate);
-
-    //   this.solve(candidate[1], this.state.goalGrid, candidate[0]);
-    //   // this.closedGrids.push(this.openGrids.shift()); 
-      
-    //   console.log('SHIFT!'); 
-    // });
+    // while openGrids still have stuff
+    if (this.openGrids.length !== 0) {
+      this.solve(this.openGrids[0].grid, goalGrid, this.openGrids[0].emptyTile);
+    }
   }
 
-  // @TODO!!! just make children, pass in move and increment by one, maybe have it in object
-  // DO NOT assign rank yet, just make children states,
-  // so I can compare child state with moves to state
-
-  // DO NOT loop through everything, trust the queue, just make fucking children here
-  // need to make path a string to compare, with a length, an array I guess, use isSameArray
   makeFringe(emptyTile, grid, goalGrid) {
     var fringe = this.gridLogic.getAllowableMoves(emptyTile, grid),
         rank,
@@ -140,7 +186,7 @@ class Solver {
       });
     });
 
-    console.log('FRINGE', frontier);
+    // console.log('FRINGE', frontier);
 
     return frontier;
   }
@@ -155,6 +201,8 @@ class Solver {
   // returns a best guess underestimate of "closeness",
   // of a grid to another grid "goal grid"
   _evaluation(grid, goalGrid, generation) {
+    // console.log('evaluation?', grid, goalGrid, generation);
+
     return this._getDistance(grid, goalGrid) + generation;
   }
 
