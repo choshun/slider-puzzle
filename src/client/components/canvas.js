@@ -40,7 +40,6 @@ class Canvas {
     this._loadImage('test');
   }
 
-  // thinking I may need to expose redrawMovedTile
   moveTile(event, moves) {
     var offsetX = event.layerX - this.canvas.offsetLeft,
         offsetY = event.layerY - this.canvas.offsetTop;
@@ -50,8 +49,8 @@ class Canvas {
     var nextMove = this._getValidMove(tile, moves);
 
     if (nextMove !== false) {
-      // may need to expose this when solving
-      this._redrawMovedTile(tile, nextMove);
+      // tile is [left, top, origTile]
+      this.redrawMovedTile(tile, nextMove[1]);
     }
 
     return nextMove;
@@ -171,9 +170,9 @@ class Canvas {
     this.context.fill();
   }
 
-  _redrawMovedTile(selectedTile, nextMove) {
+  redrawMovedTile(selectedTile, nextMove) {
     var easingValue,
-        direction = nextMove[1],
+        direction = nextMove, // TODO kinda jenky
         easingY = 0,
         easingX = 0;
 
@@ -206,7 +205,7 @@ class Canvas {
 
     if (this._iteration < this._totalIterations) {
       this._iteration++;
-      requestAnimationFrame(() => this._redrawMovedTile(selectedTile, nextMove));
+      requestAnimationFrame(() => this.redrawMovedTile(selectedTile, nextMove));
     } else {
       this._iteration = 0;
     }
