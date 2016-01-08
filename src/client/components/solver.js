@@ -33,13 +33,14 @@ class Solver {
     // keeps track of states already visited
     this.closedGrids = [];
     this.emptyFringeTile;
+    this.solution = [];
 
     // for testing
     this.steps = 0;
   }
 
   init() {
-    this.solve(this.state.grid, this.state.goalGrid, this.state.emptyTile);
+    // this.solve(this.state.grid, this.state.goalGrid, this.state.emptyTile);
   }
 
   solve(grid, goalGrid, emptyTile) {
@@ -47,20 +48,20 @@ class Solver {
 
     if (this.steps > 100) {
       // console.log('sad trombone', 'OPEN', this.openGrids, 'CLOSED', this.closedGrids);
+      // this.solution = undefined;
 
       return;
     }
-
-    // console.log('EMPTY?', emptyTile);
 
     // console.log('GRID PREARED FOR IS SAME', grid);
 
     if (this._isSameArray(grid, this.state.goalGrid)) {
-      console.log('WE DID IT IN ' + this.steps);
+      console.log('WE DID IT IN ' + this.steps, this.solution);
 
       return;
     }
 
+    // TODO this should be passed explicity
     this.emptyFringeTile = emptyTile;
 
     // TODO!!! am assigning an array, when I should push items
@@ -76,6 +77,20 @@ class Solver {
     // once I have winning object we're good, don't need nothing else.
     
     // console.log('OPEN GRIDS', this.openGrids);
+
+    // for now just best ranked, doesn't consider equal ranked ones
+    // AND WE MOVE ON!
+
+    var tile = [this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved];
+
+    console.log('TILE?', tile, this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved);
+
+    this.solution.push({
+      'tile': tile,
+      'direction': this.openGrids[0].direction
+    });
+
+    // console.log('SOLUTION', this.solution);
 
     this.solve(this.openGrids[0].grid, goalGrid, this.openGrids[0].emptyTile);
 
@@ -100,22 +115,28 @@ class Solver {
         rank,
         frontier = [];
 
+    // TODO maybe make whats returned from getAllowable a readable object
+    // direction = fringe[1]; is kinda obtuse
     fringe.forEach((fringe, index) => {
       // TODO a bit not dry with the gridLogic shuffle move thing
       var fringed = this._makeGrid(fringe, grid.slice(), this.emptyFringeTile),
           fringeGrid = fringed.grid,
-          emptyTile = fringed.emptyTile;
+          emptyTile = fringed.emptyTile,
+          direction = fringe[1],
+          tileMoved = fringe[2],
+          tileMovedPosition = fringe[0];
 
       // console.log(fringed, fringeGrid, emptyTile);
 
       rank = this._evaluation(fringeGrid, goalGrid, this.generation);
 
-
-
       frontier.push({
         'grid': fringeGrid,
         'rank': rank,
-        'emptyTile': emptyTile
+        'emptyTile': emptyTile,
+        'direction': direction,
+        'tileMoved': tileMoved,
+        'tileMovedPosition': tileMovedPosition
       });
     });
 
