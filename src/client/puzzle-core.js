@@ -37,7 +37,7 @@ import Solver from './components/solver';
                           window.msRequestAnimationFrame;
 
   var initialState = {
-    gridSize: 5,
+    gridSize: 4,
     shuffleTimes: 20,
     canvas: [
       {
@@ -126,7 +126,7 @@ import Solver from './components/solver';
       // END should be a global function passed into stuff that needs it
     }
 
-    console.log('NEXT', nextMove);
+    // console.log('NEXT', nextMove);
   });
 })();
 

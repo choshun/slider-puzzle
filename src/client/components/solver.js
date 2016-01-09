@@ -36,11 +36,11 @@ class Solver {
     this.closedGrids = [];
     this.emptyFringeTile; // TODO: should not be a property
     this.solution = [];
-    this.candidate,
-    this.candidates,
-    this.solutions = {};
+    // this.candidate, // TODO: maybe not be a property
+    // this.candidates, // TODO: maybe not be a property
+    // this.solutions = {}; // TODO: maybe not be a property
 
-    console.log('solver state at init?', this.state);
+    // console.log('solver state at init?', this.state);
 
     // assign starting grid to open grids
 
@@ -59,7 +59,7 @@ class Solver {
       'solution': []
     }];
 
-    console.log('INIT openGrids', this.openGrids);
+    // console.log('INIT openGrids', this.openGrids);
     // this.solve(this.state.grid, this.state.goalGrid, this.state.emptyTile);
   }
 
@@ -70,7 +70,9 @@ class Solver {
     // remove leftmost state and assign to candidate
     // console.log('OPEN GRID AT START', this.openGrids);
 
-    this.candidate = this.openGrids.shift();
+    var candidate = this.openGrids.shift();
+    var currentPath = candidate.solution;
+        // thisPath = currentPath.length;
 
     if (this.steps > 300) {
       // console.log('sad trombone', 'OPEN', this.openGrids, 'CLOSED', this.closedGrids);
@@ -81,10 +83,10 @@ class Solver {
 
     // console.log('GRID PREARED FOR IS SAME', grid);
 
-    if (this._isSameArray(this.candidate.grid, this.state.goalGrid)) {
-      console.log('WE DID IT IN ' + this.candidate.solution.length);
+    if (this._isSameArray(candidate.grid, this.state.goalGrid)) {
+      console.log('WE DID IT IN ' + candidate.solution.length);
 
-      this.solution = this.candidate.solution;
+      this.solution = candidate.solution;
 
       return;
     }
@@ -94,78 +96,22 @@ class Solver {
 
     // DON'T assign frontier until I have solution
     // if so, how do I assign solution to previous tile solutions?
-    // A: by making sure openTiles (this.candidate = openTiles.shift) has frontier (and maybe generation) before I evaluate it
+    // A: by making sure openTiles (candidate = openTiles.shift) has frontier (and maybe generation) before I evaluate it
     // ERRY TILE HAS A SOLUTION
-    this.candidates = this.makeFringe(emptyTile, this.candidate.grid, goalGrid, this.candidate);
 
-    // this.candidates = this.gridLogic.getAllowableMoves(emptyTile, grid);
 
-    // var fringe,
-    //     fringed,
-    //     fringeGrid,
-    //     emptyTile,
-    //     direction,
-    //     tileMoved,
-    //     tileMovedPosition,
-    //     frontier = [],
-    //     rank,
-    //     solution;
-
-    // fringe = this.gridLogic.getAllowableMoves(emptyTile, grid);
-
-    // fringe.forEach((item, index) => {
-    //   fringed = this._makeGrid(item, grid.slice(), this.emptyFringeTile),
-    //   fringeGrid = fringed.grid,
-    //   emptyTile = fringed.emptyTile,
-    //   direction = item[1],
-    //   tileMoved = item[2],
-    //   tileMovedPosition = item[0];
-    //   rank = this._evaluation(fringeGrid, goalGrid, this.generation);
-    // });
-
-    // var tile = [tileMovedPosition[0], tileMovedPosition[1], tileMoved];
-    // var solution = {
-    //   'tile': tile,
-    //   'direction': this.openGrids[0].direction
-    // }
-
-    // fringe.forEach((item, index) => {
-    //   console.log(item);
-
-    //   frontier.push({
-    //     'id': this._uniqueID(),
-    //     'grid': fringeGrid,
-    //     'rank': rank,
-    //     'emptyTile': emptyTile,
-    //     'direction': direction,
-    //     'tileMoved': tileMoved,
-    //     'tileMovedPosition': tileMovedPosition,
-    //     'solution': candidate.solution
-    //   });
-
-    //   item.solution.push({
-    //     'tile': tile,
-    //     'direction': this.openGrids[0].direction
-    //   });
-    // });
-
-    
-    // var tile = [this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved];
-    // console.log('TILE?', tile, this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved);
-
-    // this.openGrids[0].solution.push({
-    //   'tile': tile,
-    //   'direction': this.openGrids[0].direction
-    // });
+    var candidates = this.makeFringe(emptyTile, candidate, goalGrid);
 
     var isOnOpen,
         isOnClosed;
     
-    console.log('BEFORE forEach');
+    // console.log('BEFORE forEach');
 
-    this.candidates.forEach((candidate) => {
+    var paths = [];
 
-      // is in open
+    candidates.forEach((candidate) => {
+
+      // // is in open
       isOnOpen = this.openGrids.some((openGrid) => {
         return this._isSameArray(candidate.grid, openGrid.grid);
       });
@@ -175,29 +121,99 @@ class Solver {
         return this._isSameArray(candidate.grid, closedGrid.grid);
       });
 
-      // if the candidate is not on openGrids or ClosedGrids
+      // // if the candidate is not on openGrids or ClosedGrids
       if (!isOnOpen && !isOnClosed) {
-        // candidate.solution
 
-        var result = this.candidates.filter((obj) => {
-          return obj.id == candidate.id;
+        var tile = [candidate.tileMovedPosition[0], candidate.tileMovedPosition[1], candidate.tileMoved];
+
+        // console.log('CANDIDATE UNIQUE?', candidate);
+
+        // console.log('Current path at start?', currentPath, thisPath);
+
+        paths.push({
+          'tile': tile,
+          'direction': candidate.direction
         });
 
-        // console.log('no clue', this._uniqueID());
+        // currentPath[thisPath] = {
+        //   'tile': tile,
+        //   'direction': candidate.direction
+        // };
 
-        this.openGrids.push(candidate);
 
-        console.log('SOLUTION', candidate.direction, this.candidate.solution);
+
+        // console.log('Current path at assignment?', currentPath[thisPath]);
+
+        // console.log('DIRETION?', candidate.direction, 'length?', thisPath, currentPath[thisPath]);
+
+        // candidate.solution = currentPath;
+
+        // candidate.solution.push({
+        //   'tile': tile,
+        //   'direction': candidate.direction
+        // });
+
+        // console.log('CURRENT PATH?', currentPath, currentPath[thisPath]);
+
+        // this.openGrids.push(candidate);
+
+        // console.log('good right?', this.openGrids);
       }
+
+      // console.log('mangled yet?', this.openGrids);
 
       // TODO, seems redundant
-      if (isOnClosed) {
-        // this.openGrids.push(candidate);
-        // this.openGrids = this._order(this.openGrids, 'rank').slice(1);
-      }
+      // if (isOnClosed) {
+      //   // this.openGrids.push(candidate);
+      //   // this.openGrids = this._sort(this.openGrids, 'rank').slice(1);
+      // }
     });
 
-    this.openGrids = this._order(this.openGrids, 'rank');
+    // somehow if I assigned the paths in the foreach from cadidate,
+    // it would get really really bad.
+    // when I used breakpoints everything was fine,
+    // but on run time it would add multiples of the last candidate value insolution
+    var count = 0;
+
+
+
+    // for (var i = this.openGrids.length - paths.length; i < this.openGrids.length; i++) {
+      
+    //   console.log('different grids?', this.openGrids[i], 'one path?', paths[count]);
+
+    //   // var solution = this.openGrids[i].solution;
+
+    //   console.log('UNIQUE?', this.openGrids[i].direction);
+
+    //   // this.openGrids[i].solution = paths[count];
+    //   // this.openGrids[i].solution.push({
+    //   //   'puppies': 'neat' + count
+    //   // });
+      
+
+
+    //   count++; 
+    //   console.log('Count', count, paths.length, this.openGrids.length);
+    // }
+
+    // candidates[0].solution[0] = paths[0];
+
+    // console.log('what am I doing wrong?', paths, paths[0]);
+
+    // candidates[1].solution[0] = paths[1];
+    // if (paths[2] !== undefined) {
+    //   candidates[2].solution[0] = paths[2];
+    // }
+    // if (paths[3] !== undefined) {
+    //   candidates[3].solution[0] = paths[3];
+    // }
+    
+
+    // console.log('cMOOOOOn', candidates);
+
+    this.openGrids = this._sort(candidates, 'rank');
+
+    // console.log('?', this.openGrids);
 
     // TODO!!!: THIS DUN WORK
     this.generation++;
@@ -206,7 +222,7 @@ class Solver {
 
     // TODO!!!: isonclosed...
 
-    this.closedGrids.push(this.candidate);
+    this.closedGrids.push(candidate);
     
     // TODO: I might need moves made in number, and actual "moves" made to solve in object
     // once I have winning object we're good, don't need nothing else.
@@ -218,15 +234,17 @@ class Solver {
     
     // TODO!!! this should prolly be assigned in openGrid object, and not exposed 
     // until it's solved
-    // when solved say this.solution this.candidate.solution
-    var tile = [this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved];
+    // when solved say this.solution candidate.solution
+    
 
-    // console.log('TILE?', tile, this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved);
+    // var tile = [this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved];
 
-    this.openGrids[0].solution.push({
-      'tile': tile,
-      'direction': this.openGrids[0].direction
-    });
+    // // console.log('TILE?', tile, this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved);
+
+    // this.openGrids[0].solution.push({
+    //   'tile': tile,
+    //   'direction': this.openGrids[0].direction
+    // });
 
     // console.log('PER OBJECT SOLUTION?', this.openGrids[0].solution);
 
@@ -238,12 +256,11 @@ class Solver {
     }
   }
 
-  makeFringe(emptyTile, grid, goalGrid, candidate) {
-    var fringe = this.gridLogic.getAllowableMoves(emptyTile, grid),
+  makeFringe(emptyTile, candidate, goalGrid) {
+    var grid = candidate.grid,
+        fringe = this.gridLogic.getAllowableMoves(emptyTile, grid),
         rank,
         frontier = [];
-
-    console.log('candidate solution?', candidate.solution)
 
     // TODO maybe make whats returned from getAllowable a readable object
     // direction = fringe[1]; is kinda obtuse
@@ -256,36 +273,45 @@ class Solver {
           tileMoved = item[2],
           tileMovedPosition = item[0];
 
-      // console.log(fringed, fringeGrid, emptyTile);
-
       rank = this._evaluation(fringeGrid, goalGrid, this.generation);
 
-      var solution = item;
-
-      console.log('SOLUTION', candidate.solution);
-
       frontier.push({
-        'id': this._uniqueID(),
+        // 'id': this._uniqueID(),
         'grid': fringeGrid,
         'rank': rank,
         'emptyTile': emptyTile,
         'direction': direction,
         'tileMoved': tileMoved,
         'tileMovedPosition': tileMovedPosition,
-        'solution': candidate.solution
+        'solution': this._addPath(tileMovedPosition, tileMoved, direction, candidate.solution)
       });
 
-      this.solutions = {
-        fringeGrid: 2
-      };
-
-      console.log('fuck me', this.solutions)
-
+      // console.log('unique?', frontier[index].solution);
     });
 
     // console.log('FRINGE', frontier);
 
     return frontier;
+  }
+
+  _addPath(tileMovedPosition, tileMoved, direction, solution) {
+    var tile = [tileMovedPosition[0], tileMovedPosition[1], tileMoved],
+        move,
+        path = {
+          'tile': tile,
+          'direction': direction
+        }
+
+    if (solution.length === 0) {
+      move = [path]
+
+      return move;
+    } else {
+      var addOne = solution.slice();
+      addOne.push(path);
+
+      return addOne;
+    }
   }
 
   _isSameArray(grid, targetGrid) {
@@ -340,7 +366,7 @@ class Solver {
     };
   }
 
-  _order(array, key) {
+  _sort(array, key) {
     return array.sort((a, b) => {
       return a[key] - b[key]
     });
