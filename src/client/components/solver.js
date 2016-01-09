@@ -54,7 +54,8 @@ class Solver {
       'emptyTile': state.emptyTile,
       'direction': 'none', // TODO: hope this doesn't break it
       'tileMoved': 'none',
-      'tileMovedPosition': 'none'
+      'tileMovedPosition': 'none',
+      'solution': []
     }];
 
     console.log('INIT openGrids', this.openGrids);
@@ -87,7 +88,7 @@ class Solver {
     // TODO this should be passed explicity
     this.emptyFringeTile = emptyTile;
 
-    this.candidates = this.makeFringe(emptyTile, this.candidate.grid, goalGrid);
+    this.candidates = this.makeFringe(emptyTile, this.candidate.grid, goalGrid, this.candidate);
 
     var isOnOpen,
         isOnClosed;
@@ -143,10 +144,12 @@ class Solver {
 
     // console.log('TILE?', tile, this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved);
 
-    this.solution.push({
+    this.openGrids[0].solution.push({
       'tile': tile,
       'direction': this.openGrids[0].direction
     });
+
+    console.log('PER OBJECT SOLUTION?', this.openGrids[0].solution);
 
     // console.log('SOLUTION', this.solution);
 
@@ -156,10 +159,12 @@ class Solver {
     }
   }
 
-  makeFringe(emptyTile, grid, goalGrid) {
+  makeFringe(emptyTile, grid, goalGrid, candidate) {
     var fringe = this.gridLogic.getAllowableMoves(emptyTile, grid),
         rank,
         frontier = [];
+
+    console.log('candidate solution?', candidate.solution)
 
     // TODO maybe make whats returned from getAllowable a readable object
     // direction = fringe[1]; is kinda obtuse
@@ -182,7 +187,8 @@ class Solver {
         'emptyTile': emptyTile,
         'direction': direction,
         'tileMoved': tileMoved,
-        'tileMovedPosition': tileMovedPosition
+        'tileMovedPosition': tileMovedPosition,
+        'solution': candidate.solution
       });
     });
 
