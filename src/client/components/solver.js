@@ -37,7 +37,8 @@ class Solver {
     this.emptyFringeTile; // TODO: should not be a property
     this.solution = [];
     this.candidate,
-    this.candidates;
+    this.candidates,
+    this.solutions = {};
 
     console.log('solver state at init?', this.state);
 
@@ -70,7 +71,7 @@ class Solver {
 
     this.candidate = this.openGrids.shift();
 
-    if (this.steps > 1000) {
+    if (this.steps > 300) {
       // console.log('sad trombone', 'OPEN', this.openGrids, 'CLOSED', this.closedGrids);
       // this.solution = undefined;
 
@@ -90,11 +91,17 @@ class Solver {
     // TODO this should be passed explicity
     this.emptyFringeTile = emptyTile;
 
+    // DON'T assign frontier until I have solution
+    // if so, how do I assign solution to previous tile solutions?
+    // A: by making sure openTiles (this.candidate = openTiles.shift) has frontier (and maybe generation) before I evaluate it
+    // ERRY TILE HAS A SOLUTION
     this.candidates = this.makeFringe(emptyTile, this.candidate.grid, goalGrid, this.candidate);
 
     var isOnOpen,
         isOnClosed;
     
+    console.log('BEFORE forEach');
+
     this.candidates.forEach((candidate) => {
 
       // is in open
@@ -109,7 +116,17 @@ class Solver {
 
       // if the candidate is not on openGrids or ClosedGrids
       if (!isOnOpen && !isOnClosed) {
+        // candidate.solution
+
+        var result = this.candidates.filter((obj) => {
+          return obj.id == candidate.id;
+        });
+
+        // console.log('no clue', this._uniqueID());
+
         this.openGrids.push(candidate);
+
+        console.log('SOLUTION', candidate.direction, this.candidate.solution);
       }
 
       // TODO, seems redundant
@@ -150,7 +167,7 @@ class Solver {
       'direction': this.openGrids[0].direction
     });
 
-    console.log('PER OBJECT SOLUTION?', this.openGrids[0].solution);
+    // console.log('PER OBJECT SOLUTION?', this.openGrids[0].solution);
 
     // console.log('SOLUTION', this.solution);
 
@@ -169,20 +186,25 @@ class Solver {
 
     // TODO maybe make whats returned from getAllowable a readable object
     // direction = fringe[1]; is kinda obtuse
-    fringe.forEach((fringe, index) => {
+    fringe.forEach((item, index) => {
       // TODO a bit not dry with the gridLogic shuffle move thing
-      var fringed = this._makeGrid(fringe, grid.slice(), this.emptyFringeTile),
+      var fringed = this._makeGrid(item, grid.slice(), this.emptyFringeTile),
           fringeGrid = fringed.grid,
           emptyTile = fringed.emptyTile,
-          direction = fringe[1],
-          tileMoved = fringe[2],
-          tileMovedPosition = fringe[0];
+          direction = item[1],
+          tileMoved = item[2],
+          tileMovedPosition = item[0];
 
       // console.log(fringed, fringeGrid, emptyTile);
 
       rank = this._evaluation(fringeGrid, goalGrid, this.generation);
 
+      var solution = item;
+
+      console.log('SOLUTION', candidate.solution);
+
       frontier.push({
+        'id': this._uniqueID(),
         'grid': fringeGrid,
         'rank': rank,
         'emptyTile': emptyTile,
@@ -191,6 +213,13 @@ class Solver {
         'tileMovedPosition': tileMovedPosition,
         'solution': candidate.solution
       });
+
+      this.solutions = {
+        fringeGrid: 2
+      };
+
+      console.log('fuck me', this.solutions)
+
     });
 
     // console.log('FRINGE', frontier);
@@ -253,6 +282,13 @@ class Solver {
   _order(array, key) {
     return array.sort((a, b) => {
       return a[key] - b[key]
+    });
+  }
+
+  _uniqueID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = crypto.getRandomValues(new Uint8Array(1))[0]%16|0, v = c == 'x' ? r : (r&0x3|0x8);
+      return v.toString(16);
     });
   }
 }

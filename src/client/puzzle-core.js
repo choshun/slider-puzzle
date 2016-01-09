@@ -37,8 +37,8 @@ import Solver from './components/solver';
                           window.msRequestAnimationFrame;
 
   var initialState = {
-    gridSize: 3,
-    shuffleTimes: 10,
+    gridSize: 5,
+    shuffleTimes: 20,
     canvas: [
       {
         'image': '/images/cat.jpg',
