@@ -38,7 +38,7 @@ import Solver from './components/solver';
 
   var initialState = {
     gridSize: 4,
-    shuffleTimes: 20,
+    shuffleTimes: 100,
     canvas: [
       {
         'image': '/images/cat.jpg',
