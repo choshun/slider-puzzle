@@ -85,7 +85,7 @@ import Solver from './components/solver';
   solver.solveButton.addEventListener('click', (event) => {
     var solveInterval;
 
-    solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
+    solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile, []);
 
     var moveCount = 0;
 

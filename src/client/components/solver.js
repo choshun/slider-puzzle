@@ -63,7 +63,8 @@ class Solver {
     // this.solve(this.state.grid, this.state.goalGrid, this.state.emptyTile);
   }
 
-  solve(grid, goalGrid, emptyTile) {
+  // TODO!!! I have to pass frontier to append to solution :(
+  solve(grid, goalGrid, emptyTile, frontier) {
     this.steps++; // really needs to be internal to object, especially if we find a faster path
 
     // remove leftmost state and assign to candidate
@@ -96,6 +97,66 @@ class Solver {
     // A: by making sure openTiles (this.candidate = openTiles.shift) has frontier (and maybe generation) before I evaluate it
     // ERRY TILE HAS A SOLUTION
     this.candidates = this.makeFringe(emptyTile, this.candidate.grid, goalGrid, this.candidate);
+
+    // this.candidates = this.gridLogic.getAllowableMoves(emptyTile, grid);
+
+    // var fringe,
+    //     fringed,
+    //     fringeGrid,
+    //     emptyTile,
+    //     direction,
+    //     tileMoved,
+    //     tileMovedPosition,
+    //     frontier = [],
+    //     rank,
+    //     solution;
+
+    // fringe = this.gridLogic.getAllowableMoves(emptyTile, grid);
+
+    // fringe.forEach((item, index) => {
+    //   fringed = this._makeGrid(item, grid.slice(), this.emptyFringeTile),
+    //   fringeGrid = fringed.grid,
+    //   emptyTile = fringed.emptyTile,
+    //   direction = item[1],
+    //   tileMoved = item[2],
+    //   tileMovedPosition = item[0];
+    //   rank = this._evaluation(fringeGrid, goalGrid, this.generation);
+    // });
+
+    // var tile = [tileMovedPosition[0], tileMovedPosition[1], tileMoved];
+    // var solution = {
+    //   'tile': tile,
+    //   'direction': this.openGrids[0].direction
+    // }
+
+    // fringe.forEach((item, index) => {
+    //   console.log(item);
+
+    //   frontier.push({
+    //     'id': this._uniqueID(),
+    //     'grid': fringeGrid,
+    //     'rank': rank,
+    //     'emptyTile': emptyTile,
+    //     'direction': direction,
+    //     'tileMoved': tileMoved,
+    //     'tileMovedPosition': tileMovedPosition,
+    //     'solution': candidate.solution
+    //   });
+
+    //   item.solution.push({
+    //     'tile': tile,
+    //     'direction': this.openGrids[0].direction
+    //   });
+    // });
+
+    
+    // var tile = [this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved];
+    // console.log('TILE?', tile, this.openGrids[0].tileMovedPosition[0], this.openGrids[0].tileMovedPosition[1], this.openGrids[0].tileMoved);
+
+    // this.openGrids[0].solution.push({
+    //   'tile': tile,
+    //   'direction': this.openGrids[0].direction
+    // });
 
     var isOnOpen,
         isOnClosed;
@@ -173,7 +234,7 @@ class Solver {
 
     // while openGrids still have stuff
     if (this.openGrids.length !== 0) {
-      this.solve(this.openGrids[0].grid, goalGrid, this.openGrids[0].emptyTile);
+      this.solve(this.openGrids[0].grid, goalGrid, this.openGrids[0].emptyTile, frontier);
     }
   }
 
