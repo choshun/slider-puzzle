@@ -80,7 +80,9 @@ class Solver {
     // console.log('GRID PREARED FOR IS SAME', grid);
 
     if (this._isSameArray(this.candidate.grid, this.state.goalGrid)) {
-      console.log('WE DID IT IN ' + this.steps, this.solution.length);
+      console.log('WE DID IT IN ' + this.candidate.solution.length);
+
+      this.solution = this.candidate.solution;
 
       return;
     }
@@ -108,7 +110,6 @@ class Solver {
       // if the candidate is not on openGrids or ClosedGrids
       if (!isOnOpen && !isOnClosed) {
         this.openGrids.push(candidate);
-        
       }
 
       // TODO, seems redundant

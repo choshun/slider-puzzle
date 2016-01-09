@@ -37,8 +37,8 @@ import Solver from './components/solver';
                           window.msRequestAnimationFrame;
 
   var initialState = {
-    gridSize: 4,
-    shuffleTimes: 30,
+    gridSize: 3,
+    shuffleTimes: 10,
     canvas: [
       {
         'image': '/images/cat.jpg',
@@ -87,12 +87,14 @@ import Solver from './components/solver';
 
     solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
 
-    if (solver.solution !== undefined) {
-      var moveCount = 0;
+    var moveCount = 0;
 
-      // TODO: put into function
-      solveInterval = setInterval(() => {
-        
+
+    // TODO: put into function
+    solveInterval = setInterval(() => {
+      
+      if (solver.solution !== undefined) {
+
         if (moveCount >= solver.solution.length) {
           clearInterval(solveInterval);
           return;
@@ -100,8 +102,10 @@ import Solver from './components/solver';
 
         canvas.redrawMovedTile(solver.solution[moveCount].tile, solver.solution[moveCount].direction);
         moveCount++;
-      }, 300);
-    }
+      }
+    }, 300);
+    
+
   });
 
   // move
