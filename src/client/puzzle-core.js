@@ -28,8 +28,10 @@
 //  1/9/16 TODO
 //  canvas prettifying
 //  make responsive
-//    center any uploaded image in canvas
-//    center canvas element in center of page
+//    center any uploaded image in canvas based on image size - DONE
+//    center canvas element in center of page -DONE
+//    If image is too big make tiles fit to 100% viewport
+//      center image in smaller viewport
 //    when resize repaint canvas
 //    add image as blurred bg
 //    when canvas paints after image selection make it 
@@ -62,7 +64,7 @@ import Solver from './components/solver';
     shuffleTimes: 55,
     canvas: [
       {
-        'image': '/images/cat.jpg',
+        'image': '/images/cat1.jpg',
         'name': 'test1'
       }
     ]
