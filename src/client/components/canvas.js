@@ -45,8 +45,8 @@ class Canvas {
   }
 
   moveTile(event, moves) {
-    var offsetX = event.layerX - this.canvas.offsetLeft,
-        offsetY = event.layerY - this.canvas.offsetTop;
+    var offsetX = event.layerX,
+        offsetY = event.layerY;
 
     var tile = this._getTile(offsetX, offsetY);
     // maybe just get direction? (tile, direction) seems more understandable
@@ -117,10 +117,11 @@ class Canvas {
 
   // TODO, for resize I may wanna not have imageWidth/appwidth stuff in here,
   // have as seperate function
-  _loadImage(image) {
+  _loadImage() {
     this.imageObj = new Image();
 
     this.imageObj.onload = () => {
+
       var cover = this._width > this._height ? this._width : this._height,
           image = this.imageObj,
           imageWidth = image.width,
@@ -136,6 +137,9 @@ class Canvas {
         // kinda jenky, adding small-x makes it position: fixed,
         // left: 0. Flex box no longer works, adding the offset
         this.canvas.style.top = (!smallY) ? offsetY + 'px' : 0;
+      } else {
+        this.canvas.classList.remove('small-x');
+        this.canvas.style.top = 'auto';
       }
 
       this._width = (smallX) ? appElement.offsetWidth : imageWidth;
