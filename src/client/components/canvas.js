@@ -23,10 +23,12 @@ class Canvas {
 
     // For canvas grid
     this.gridSize = this.state.gridSize;
-    this._width = this.canvas.offsetWidth;
-    this._height = this.canvas.offsetHeight;
-    this._tileWidth = this._width / this.gridSize;
-    this._tileHeight = this._height / this.gridSize;
+
+    // set after image is loaded
+    this._width = 0;
+    this._height = 0;
+    this._tileWidth = 0;
+    this._tileHeight = 0;
     this._directionLookup = {
       'UP': - 1,
       'DOWN': + 1,
@@ -109,6 +111,76 @@ class Canvas {
     }
   }
 
+  _loadImage(image) {
+    this.imageObj = new Image();
+
+    this.imageObj.onload = (image) => {
+      var cover = this._width > this._height ? this._width : this._height,
+          image = this.imageObj,
+          width = image.width,
+          height = image.height;
+
+      console.log('dimensions?', width, height);
+        
+      this._width = width;
+      this._height = height;
+      this._tileWidth = this._width / this.gridSize;
+      this._tileHeight = this._height / this.gridSize;
+
+      this.canvas.setAttribute('height', height);
+      this.canvas.setAttribute('width', width);
+
+      this._drawTiles(this.imageObj, false);
+    };
+
+    this.imageObj.src = this.state.canvas[0].image;
+  }
+
+  _drawTiles(imageObj, draw, selectedTile) {
+    var i = 0,
+        j = 0,
+        count = 0;
+
+    this.context.font = "30px Helvetica";
+    this.context.fillStyle = "#ff00ff";
+
+    for (j = 0; j < this.gridSize; j++) {
+      for (i = 0; i < this.gridSize; i++) {
+        var tile,
+            placementX,
+            placementY;
+
+        if (count < this.state.grid.length) {
+          this.context.beginPath();
+          this.context.stroke();
+          
+          // tile[0] is upperleft tile, it contains it's x, y in grid. 
+          // Could be shuffled, ie tile[0] is [1, 1], which means the upperleft part 
+          // of the original pic is now at 1 tile to the right, 1 tile down 
+          tile = this.state.grid[count];
+          placementX = tile[0];
+          placementY = tile[1];
+
+          this.context.drawImage(
+            this.imageObj,
+            this._tileWidth * i, // tile bg position x
+            this._tileHeight * j, // tile bg position y
+            this._tileWidth,
+            this._tileHeight,
+            this._tileWidth * placementX, // tile position x
+            this._tileHeight * placementY, // tile position y
+            this._tileWidth, this._tileHeight);
+        }
+        
+        this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
+
+        count++;
+      }
+    }
+
+    this.context.fill();
+  }
+
   _getTile(offsetX, offsetY) {
     var left = Math.floor(offsetX / this._tileWidth),
         top = Math.floor(offsetY / this._tileHeight);
@@ -161,66 +233,6 @@ class Canvas {
       return changeInValue / 2 * currentIteration * currentIteration + startValue;
     }
     return -changeInValue / 2 * ((--currentIteration) * (currentIteration - 2) - 1) + startValue;
-  }
-
-  _loadImage(image) {
-    this.imageObj = new Image();
-
-    this.imageObj.onload = () => {
-      var cover = this._width > this._height ? this._width : this._height;
-
-      this.canvas.setAttribute('height', this.canvas.offsetHeight);
-      this.canvas.setAttribute('width', this.canvas.offsetWidth);
-
-      this._drawTiles(this.imageObj, false);
-    };
-
-    this.imageObj.src = this.state.canvas[0].image;
-  }
-
-  _drawTiles(imageObj, draw, selectedTile) {
-    var i = 0,
-        j = 0,
-        count = 0;
-
-    this.context.font = "30px Helvetica";
-    this.context.fillStyle = "#ff00ff";
-
-    for (j = 0; j < this.gridSize; j++) {
-      for (i = 0; i < this.gridSize; i++) {
-        var tile,
-            placementX,
-            placementY;
-
-        if (count < this.state.grid.length) {
-          this.context.beginPath();
-          this.context.stroke();
-          
-          // tile[0] is upperleft tile, it contains it's x, y in grid. 
-          // Could be shuffled, ie tile[0] is [1, 1], which means the upperleft part 
-          // of the original pic is now at 1 tile to the right, 1 tile down 
-          tile = this.state.grid[count];
-          placementX = tile[0];
-          placementY = tile[1];
-
-          this.context.drawImage(
-            this.imageObj,
-            this._tileWidth * i, // tile bg position x
-            this._tileHeight * j, // tile bg position y
-            this._tileWidth,
-            this._tileHeight,
-            this._tileWidth * placementX, // tile position x
-            this._tileHeight * placementY, // tile position y
-            this._tileWidth, this._tileHeight);
-        }
-        
-        this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
-
-        count++;
-      }
-    }
-
-    this.context.fill();
   }
 }
 
