@@ -24,7 +24,17 @@
 //    right now I add to solver.solved as it loops, this may balloon when
 //    trees expand - DONE(ish)
 //  put in worker
-//  
+
+//  1/9/16 TODO
+//  canvas prettifying
+//  make responsive
+//    center any uploaded image in canvas
+//    center canvas element in center of page
+//    when resize repaint canvas
+//    add image as blurred bg
+//    when canvas paints after image selection make it 
+//      have a cool animation 
+//      (different global-alphas and maybe position)
 */
 
 require('./puzzle-core.scss');
