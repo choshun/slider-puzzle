@@ -1,6 +1,8 @@
 // - only import public methods, not whole objects. see es6 destructuring
 // - stuff like next move and canvas stuff might be good to be objects
 //   ie, nextMoveTile = nextMove[2] is kinda vague
+// - shuffle button?
+
 
 // 1/6/16 TODO
 // move
@@ -27,16 +29,30 @@
 
 //  1/9/16 TODO
 //  canvas prettifying
-//  make responsive
-//    center any uploaded image in canvas based on image size - DONE
-//    center canvas element in center of page -DONE
-//    If image is too big make tiles fit to 100% viewport -DONE
-//      center image in smaller viewport
-//    when resize repaint canvas
+//    make responsive
+//      center any uploaded image in canvas based on image size - DONE
+//      center canvas element in center of page -DONE
+//      If image is too big make tiles fit to 100% viewport -DONE
+//        center image in smaller viewport -DONE
+//      when resize repaint canvas
+//  
 //    add image as blurred bg
 //    when canvas paints after image selection make it 
 //      have a cool animation 
 //      (different global-alphas and maybe position)
+//
+//  intro/outro
+//    make a modal with passed in elements,
+//      render element in model
+//      ie {
+          "p": "good job",
+          "button": {
+            "value": 25,
+            "text": "shuffle amount"
+          }
+        }
+
+        or just pass in elements... that's easier
 */
 
 require('./puzzle-core.scss');
@@ -60,11 +76,11 @@ import Solver from './components/solver';
 
   */
   var initialState = {
-    gridSize: 4,
+    gridSize: 5,
     shuffleTimes: 55,
     canvas: [
       {
-        'image': '/images/cat1.jpg',
+        'image': '/images/small-cat.png',
         'name': 'test1'
       }
     ]
