@@ -163,6 +163,9 @@ import Solver from './components/solver';
       globalState.state.emptyTile = nextMovePosition;
       globalState.state.grid[nextMoveTile] = toPosition;
       // END should be a global function passed into stuff that needs it
+
+      // !!!TODO if solver.isSameArray(globalState.state.grid, globalState.state.goalGrid)
+      // show outro/save
     }
 
     // console.log('NEXT', nextMove);
