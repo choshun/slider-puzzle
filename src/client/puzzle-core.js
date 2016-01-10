@@ -14,11 +14,15 @@
 // 1/7/16 TODO
 // solve
 //  when you hit solve button, and it's solved, have grid update to solved state - DONE
+//  make each grid have it's history for open/closed grid path comparisons
 //  rewrite solve algorithm to EXACTLY what the innernet said it should be
-//  test for same rank trees, this is where it hangs all the time
+//    not on open or closed - DONE
+//    on closed - :(
+//    on open - DONE
+//  test for same rank trees, this is where it hangs all the time - kinda done? should be addressed by prev todo
 //  make sure solve doesn't fire until final tree is made
 //    right now I add to solver.solved as it loops, this may balloon when
-//    trees expand
+//    trees expand - DONE(ish)
 //  put in worker
 //  
 */
@@ -36,9 +40,16 @@ import Solver from './components/solver';
                           window.webkitRequestAnimationFrame ||
                           window.msRequestAnimationFrame;
 
+  // TODO: 
+  /*
+    Thinking 
+    3,4,5 grid size and
+    15 35 55 for shuffling
+
+  */
   var initialState = {
     gridSize: 4,
-    shuffleTimes: 100,
+    shuffleTimes: 55,
     canvas: [
       {
         'image': '/images/cat.jpg',
@@ -85,7 +96,7 @@ import Solver from './components/solver';
   solver.solveButton.addEventListener('click', (event) => {
     var solveInterval;
 
-    solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile, []);
+    solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
 
     var moveCount = 0;
 
