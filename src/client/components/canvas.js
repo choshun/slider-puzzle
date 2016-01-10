@@ -114,22 +114,31 @@ class Canvas {
   _loadImage(image) {
     this.imageObj = new Image();
 
-    this.imageObj.onload = (image) => {
+    this.imageObj.onload = () => {
       var cover = this._width > this._height ? this._width : this._height,
           image = this.imageObj,
-          width = image.width,
-          height = image.height;
+          imageWidth = image.width,
+          imageHeight = image.height,
+          appElement = this.appElement,
+          smallX = appElement.offsetWidth < imageWidth,
+          smallY = appElement.offsetHeight < imageHeight;
 
-      console.log('dimensions?', width, height);
-        
-      this._width = width;
-      this._height = height;
+      if (smallX) {
+        this.canvas.classList.add('small-x');
+        // kinda jenky, adding small-x makes it position: fixed,
+        // left: 0. Flex box no longer works, adding the offset
+        var smallVerticalOffset = (!smallY) ?
+            (appElement.offsetHeight - imageHeight) / 2 : 0;
+        this.canvas.style.top = smallVerticalOffset + 'px';
+      }
+
+      this._width = (smallX) ? appElement.offsetWidth : imageWidth;
+      this._height = (smallY) ? appElement.offsetHeight : imageHeight;
       this._tileWidth = this._width / this.gridSize;
       this._tileHeight = this._height / this.gridSize;
 
-      this.canvas.setAttribute('height', height);
-      this.canvas.setAttribute('width', width);
-
+      this.canvas.setAttribute('height', this._height);
+      this.canvas.setAttribute('width', this._width);
       this._drawTiles(this.imageObj, false);
     };
 
