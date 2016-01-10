@@ -59,6 +59,7 @@
 require('./puzzle-core.scss');
 
 import GlobalState from './components/global-state';
+import PuzzleSelect from './components/puzzle-select';
 import Canvas from './components/canvas';
 import GridLogic from './components/grid-logic';
 import Solver from './components/solver';
@@ -79,7 +80,12 @@ import Solver from './components/solver';
   var initialState = {
     gridSize: 5,
     shuffleTimes: 50,
+    appElement: document.getElementById('app'),
     canvas: [
+      {
+        'image': '/images/weed-erryday.jpg',
+        'name': 'smaller cat'
+      },
       {
         'image': '/images/sc4a.jpg',
         'name': 'art'
@@ -93,10 +99,134 @@ import Solver from './components/solver';
         'name': 'cat!'
       },
       {
+        'image': '/images/bear-shark-unicornsurfing.jpg',
+        'name': 'surfing'
+      },
+      {
+        'image': '/images/weed-erryday.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/sc4a.jpg',
+        'name': 'art'
+      },
+      {
+        'image': '/images/cat.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/cat1.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/cat.jpg',
+        'name': 'cat!'
+      },
+
+      {
         'image': '/images/small-cat.png',
         'name': 'smaller cat'
+      },
+      {
+        'image': '/images/cat1.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/ps-battle1.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/cat1.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/cat.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/small-cat.png',
+        'name': 'smaller cat'
+      },
+      {
+        'image': '/images/sc4a.jpg',
+        'name': 'art'
+      },
+      {
+        'image': '/images/cat1.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/cat.jpg',
+        'name': 'cat!'
+      },
+
+      {
+        'image': '/images/small-cat.png',
+        'name': 'smaller cat'
+      },
+      {
+        'image': '/images/pretty.jpg',
+        'name': 'cat!'
+      },
+
+      {
+        'image': '/images/sc4a.jpg',
+        'name': 'art'
+      },
+      {
+        'image': '/images/cat.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/shmeh.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/cat.jpg',
+        'name': 'cat!'
+      },
+
+      {
+        'image': '/images/pretty.jpg',
+        'name': 'smaller cat'
+      },
+      {
+        'image': '/images/shmeh.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/ps-battle1.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/shmeh.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/cat.jpg',
+        'name': 'cat!'
+      },
+
+      {
+        'image': '/images/ps-battle1.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/shmeh.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/cat.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/small-cat.png',
+        'name': 'smaller cat'
+      },
+      {
+        'image': '/images/bear-shark-unicornsurfing.jpg',
+        'name': 'surfing'
       }
-      
     ]
   };
 
@@ -110,85 +240,125 @@ import Solver from './components/solver';
   // application? Maybe also move... have move be the only custom
   // event? (needs to change/use gridlogic.move and canvas.move from solver)
   var globalState = new GlobalState(initialState);
+  var puzzleSelect = new PuzzleSelect(initialState);
   var gridLogic = new GridLogic(globalState);
   var canvas = new Canvas(globalState, gridLogic);
   var solver = new Solver(globalState, gridLogic, canvas);
 
   var resizeTimeout;
 
-  // Set up the board
-  gridLogic.init();
+  function init() {
+    puzzleSelect.init();
 
-  // TODO Might not need this, can just reference this in gridLogic.grid
-  globalState.setProperty('grid', gridLogic.shuffledGrid);
-  globalState.setProperty('goalGrid', gridLogic.goalGrid);
-  globalState.setProperty('emptyTile', gridLogic.emptyTile);
+    bindPuzzleSelection();
+
+    //startPuzzle();
 
 
-  // TODO maybe not do init, and just fire them directly so 
-  // it's easier to read?
+  }
 
-  // Paint the sliding puzzle using global state's shuffled grid
-  canvas.init();
+  function bindPuzzleSelection() {
+    var i;
 
-  // Get ready to solve
-  solver.init(globalState.state);
+    var puzzles = document.querySelectorAll('.puzzle');
 
-  // bind solve
+    for (i = 0; i < puzzles.length; i++) {
+      puzzles[i].addEventListener('click', function(event) {
+        startPuzzle(this.getAttribute('id'));
+      });
+    }
+  }
+
+  function startPuzzle(selectedImage) {
+    // Set up the board
+    document.querySelector('main').classList.add('puzzle-time');
+
+    gridLogic.init();
+
+    // TODO Might not need this, can just reference this in gridLogic.grid
+    globalState.setProperty('grid', gridLogic.shuffledGrid);
+    globalState.setProperty('goalGrid', gridLogic.goalGrid);
+    globalState.setProperty('emptyTile', gridLogic.emptyTile);
+
+    // TODO maybe not do init, and just fire them directly so 
+    // it's easier to read?
+
+    // Paint the sliding puzzle using global state's shuffled grid
+    canvas.init(selectedImage);
+
+    // Get ready to solve
+    solver.init(globalState.state);
+
+    bindSolveButton();
+    bindMove();
+    bindResize();
+  }
+
   // maybe only share global state explicitly? like this?
   // so components don't need to maintain global state internaly.
-  solver.solveButton.addEventListener('click', (event) => {
-    var solveInterval,
-        moveCount = 0;
-    
-    solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
-    
-    solveInterval = setInterval(() => {
+
+  function bindSolveButton() {
+    solver.solveButton.addEventListener('click', (event) => {
+      var solveInterval,
+          moveCount = 0;
       
-      if (solver.solution !== undefined) {
+      solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
+      
+      // TODO: will be replaced with a wroker, so postMessage stuff
+      solveInterval = setInterval(() => {
+        
+        if (solver.solution !== undefined) {
 
-        if (moveCount >= solver.solution.length) {
-          clearInterval(solveInterval);
-          return;
+          if (moveCount >= solver.solution.length) {
+            clearInterval(solveInterval);
+            return;
+          }
+
+          canvas.redrawMovedTile(solver.solution[moveCount].tile, solver.solution[moveCount].direction);
+          moveCount++;
         }
+      }, 300);
+    });
+  }
 
-        canvas.redrawMovedTile(solver.solution[moveCount].tile, solver.solution[moveCount].direction);
-        moveCount++;
+  function bindMove() {
+    globalState.state.appElement.addEventListener('click', (event) => {
+      var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid);
+      var nextMove = canvas.moveTile(event, moves);
+      
+      if (nextMove !== false) {
+        var nextMovePosition = nextMove[0],
+            nextMoveTile = nextMove[2];
+
+        // TODO: Again not DRY, used in gridlogic and solver
+        // START should be a global function passed into stuff that needs it
+        var toPosition = globalState.state.emptyTile;
+
+        globalState.state.emptyTile = nextMovePosition;
+        globalState.state.grid[nextMoveTile] = toPosition;
+        // END should be a global function passed into stuff that needs it
+
+        // !!!TODO if solver.isSameArray(globalState.state.grid, globalState.state.goalGrid)
+        // show outro/save
       }
-    }, 300);
-  });
 
-  // move
-  canvas.appElement.addEventListener('click', (event) => {
-    var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid);
-    var nextMove = canvas.moveTile(event, moves);
-    
-    if (nextMove !== false) {
-      var nextMovePosition = nextMove[0],
-          nextMoveTile = nextMove[2];
+      // console.log('NEXT', nextMove);
+    });
+  }
 
-      // TODO: Again not DRY, used in gridlogic and solver
-      // START should be a global function passed into stuff that needs it
-      var toPosition = globalState.state.emptyTile;
+  function bindResize() {
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
 
-      globalState.state.emptyTile = nextMovePosition;
-      globalState.state.grid[nextMoveTile] = toPosition;
-      // END should be a global function passed into stuff that needs it
+      resizeTimeout = setTimeout(() => {
+        canvas.init();
 
-      // !!!TODO if solver.isSameArray(globalState.state.grid, globalState.state.goalGrid)
-      // show outro/save
-    }
+        console.log('resize?');
+      }, 400);
+    });
+  }
 
-    // console.log('NEXT', nextMove);
-  });
+  init();
 
-  // resize
-  window.addEventListener('resize', () => {
-    clearTimeout(resizeTimeout);
-
-    resizeTimeout = setTimeout(() => {
-      canvas.init();
-    }, 400);
-  });
 })();
 
