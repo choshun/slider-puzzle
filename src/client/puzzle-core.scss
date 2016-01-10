@@ -1,6 +1,8 @@
 body,
 html,
 main,
+.select-puzzle,
+.puzzle-list,
 .scene {
 	height: 100%;
   width: 100%;
@@ -10,15 +12,21 @@ main,
 
 }
 
-main {
+main.puzzle-time {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  .select-puzzle {
+    position: fixed;
+    left: 0;
+  }
 }
 
 .scene {
   height: auto;
   width: auto;
+  z-index: 2;
 
   &.small-x {
     position: fixed;
@@ -26,15 +34,32 @@ main {
   }
 }
 
-img {
-    position: fixed;
-    z-index: 0;
-}
-
 .solve-button {
   z-index: 20;
   position: fixed;
   top: 10%;
   left: 10%;
+}
+
+ul {
+  list-style: none;
+  -webkit-margin-before: 0;
+  -webkit-margin-after: 0;
+  -webkit-margin-start: 0;
+  -webkit-margin-end: 0px;
+  -webkit-padding-start: 0;
+}
+
+.puzzle {
+  width: 20%;
+  float: left;
+  height: 40%;
+  overflow: hidden;
+  background-attachment: fixed;
+  background-size: cover;
+
+  img {
+    width: 100%;
+  }
 }
     
