@@ -2,6 +2,7 @@
 // - stuff like next move and canvas stuff might be good to be objects
 //   ie, nextMoveTile = nextMove[2] is kinda vague
 // - shuffle button?
+// - update grid after all moved are done
 
 
 // 1/6/16 TODO
@@ -72,17 +73,30 @@ import Solver from './components/solver';
   /*
     Thinking 
     3,4,5 grid size and
-    15 35 55 for shuffling
+    15 30 50 for shuffling
 
   */
   var initialState = {
     gridSize: 5,
-    shuffleTimes: 55,
+    shuffleTimes: 50,
     canvas: [
       {
+        'image': '/images/sc4a.jpg',
+        'name': 'art'
+      },
+      {
+        'image': '/images/cat1.jpg',
+        'name': 'cat!'
+      },
+      {
+        'image': '/images/cat.jpg',
+        'name': 'cat!'
+      },
+      {
         'image': '/images/small-cat.png',
-        'name': 'test1'
+        'name': 'smaller cat'
       }
+      
     ]
   };
 
@@ -92,13 +106,15 @@ import Solver from './components/solver';
   // remember, last move is assigned somewhere weird in gridlogic
 
   // TODO Not liking the dependancies
-  // maybe have allowable moves in global-state, and just call it 
+  // maybe have allowable moves in global-state, and just call it
   // application? Maybe also move... have move be the only custom
   // event? (needs to change/use gridlogic.move and canvas.move from solver)
   var globalState = new GlobalState(initialState);
   var gridLogic = new GridLogic(globalState);
   var canvas = new Canvas(globalState, gridLogic);
   var solver = new Solver(globalState, gridLogic, canvas);
+
+  var resizeTimeout;
 
   // Set up the board
   gridLogic.init();
@@ -122,14 +138,11 @@ import Solver from './components/solver';
   // maybe only share global state explicitly? like this?
   // so components don't need to maintain global state internaly.
   solver.solveButton.addEventListener('click', (event) => {
-    var solveInterval;
-
+    var solveInterval,
+        moveCount = 0;
+    
     solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
-
-    var moveCount = 0;
-
-
-    // TODO: put into function
+    
     solveInterval = setInterval(() => {
       
       if (solver.solution !== undefined) {
@@ -143,8 +156,6 @@ import Solver from './components/solver';
         moveCount++;
       }
     }, 300);
-    
-
   });
 
   // move
@@ -169,6 +180,15 @@ import Solver from './components/solver';
     }
 
     // console.log('NEXT', nextMove);
+  });
+
+  // resize
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+
+    resizeTimeout = setTimeout(() => {
+      canvas.init();
+    }, 400);
   });
 })();
 
