@@ -30,7 +30,7 @@
 //  make responsive
 //    center any uploaded image in canvas based on image size - DONE
 //    center canvas element in center of page -DONE
-//    If image is too big make tiles fit to 100% viewport
+//    If image is too big make tiles fit to 100% viewport -DONE
 //      center image in smaller viewport
 //    when resize repaint canvas
 //    add image as blurred bg
