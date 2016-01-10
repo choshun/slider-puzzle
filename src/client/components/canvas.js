@@ -8,14 +8,13 @@ class Canvas {
    * @param {Object} state options
    */
   constructor(globalState) {
-    this.globalState = globalState;
     this.state = globalState.state || {};
 
     // Canvas stuff
-    this.appElement = document.getElementById('app');
     this.canvas = this._createCanvas();
     this.context = this.canvas.getContext('2d');
     this.imageObj;
+    this.selectedImage;
 
     // For animation
     this._iteration = 0,
@@ -39,9 +38,10 @@ class Canvas {
     };
   }
 
-  init() {
+  init(selectedImage) {
     // paint 
-    this._loadImage('test');
+    this.selectedImage = selectedImage || this.selectedImage;
+    this._loadImage(this.selectedImage);
   }
 
   moveTile(event, moves) {
@@ -117,7 +117,7 @@ class Canvas {
 
   // TODO, for resize I may wanna not have imageWidth/appwidth stuff in here,
   // have as seperate function
-  _loadImage() {
+  _loadImage(selectedImage) {
     this.imageObj = new Image();
 
     this.imageObj.onload = () => {
@@ -126,7 +126,7 @@ class Canvas {
           image = this.imageObj,
           imageWidth = image.width,
           imageHeight = image.height,
-          appElement = this.appElement,
+          appElement = this.state.appElement,
           smallX = appElement.offsetWidth < imageWidth,
           smallY = appElement.offsetHeight < imageHeight,
           offsetY = (appElement.offsetHeight - imageHeight) / 2,
@@ -152,7 +152,7 @@ class Canvas {
       this._drawTiles(offsetY, offsetX);
     };
 
-    this.imageObj.src = this.state.canvas[0].image;
+    this.imageObj.src = selectedImage;
   }
 
   _drawTiles(offsetY, offsetX) {
@@ -160,8 +160,8 @@ class Canvas {
         j = 0,
         count = 0;
 
-    this.context.font = "30px Helvetica";
-    this.context.fillStyle = "#ff00ff";
+    // this.context.font = "30px Helvetica";
+    // this.context.fillStyle = "#ff00ff";
 
     // TODO: maybe do before passed,
     // but it messes up canvas centering first try
@@ -196,7 +196,7 @@ class Canvas {
             this._tileWidth, this._tileHeight);
         }
         
-        this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
+        // this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
 
         count++;
       }
@@ -247,7 +247,7 @@ class Canvas {
   _createCanvas() {
     var canvas = document.createElement('canvas');
     canvas.setAttribute('class', 'scene');
-    this.appElement.appendChild(canvas);
+    this.state.appElement.appendChild(canvas);
 
     return canvas;
   }
