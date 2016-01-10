@@ -23,7 +23,7 @@ class Canvas {
 
     // For canvas grid
     this.gridSize = this.state.gridSize;
-    this._width = this.canvas.offsetWidth,
+    this._width = this.canvas.offsetWidth;
     this._height = this.canvas.offsetHeight;
     this._tileWidth = this._width / this.gridSize;
     this._tileHeight = this._height / this.gridSize;
@@ -32,7 +32,7 @@ class Canvas {
       'DOWN': + 1,
       'LEFT': - 1,
       'RIGHT': + 1,
-    }
+    };
   }
 
   init() {
@@ -49,11 +49,64 @@ class Canvas {
     var nextMove = this._getValidMove(tile, moves);
 
     if (nextMove !== false) {
-      // tile is [left, top, origTile]
+      // tile is [left, top, origTile], done this way for solver.solution
       this.redrawMovedTile(tile, nextMove[1]);
     }
 
     return nextMove;
+  }
+
+  redrawMovedTile(selectedTile, nextMove) {
+    var easingValue,
+        direction = nextMove, // TODO kinda jenky
+        easingY = 0,
+        easingX = 0;
+
+    if (direction === 'UP' || direction === 'DOWN') {
+      easingValue = this._easeInOutQuad(
+          this._iteration,
+          0,
+          this._tileHeight,
+          this._totalIterations
+      );
+
+      easingY = this._directionLookup[direction] * easingValue;
+    } else {
+      easingValue = this._easeInOutQuad(
+          this._iteration,
+          0,
+          this._tileWidth,
+          this._totalIterations
+      );
+
+      easingX = this._directionLookup[direction] * easingValue;
+    }
+
+    this.context.closePath();
+
+    this.context.clearRect(
+      this._tileWidth * selectedTile[0],
+      this._tileHeight * selectedTile[1],
+      this._tileWidth,
+      this._tileHeight);
+
+    this.context.drawImage(
+      this.imageObj,
+      this._tileWidth * this.state.goalGrid[selectedTile[2]][0], // tile bg position x
+      this._tileHeight * this.state.goalGrid[selectedTile[2]][1], // tile bg position y
+      this._tileWidth,
+      this._tileHeight,
+      this._tileWidth * selectedTile[0] + easingX, // tile position X
+      this._tileHeight * selectedTile[1] + easingY, // tile position Y
+      this._tileWidth,
+      this._tileHeight);
+
+    if (this._iteration < this._totalIterations) {
+      this._iteration++;
+      requestAnimationFrame(() => this.redrawMovedTile(selectedTile, nextMove));
+    } else {
+      this._iteration = 0;
+    }
   }
 
   _getTile(offsetX, offsetY) {
@@ -61,7 +114,7 @@ class Canvas {
         top = Math.floor(offsetY / this._tileHeight);
 
     var origTile = this._findArraysIndex(this.state.grid, [left, top]);
-    
+
     return [left, top, origTile]; //return tile for grid logic, top and left for canvas
   }
 
@@ -168,47 +221,6 @@ class Canvas {
     }
 
     this.context.fill();
-  }
-
-  redrawMovedTile(selectedTile, nextMove) {
-    var easingValue,
-        direction = nextMove, // TODO kinda jenky
-        easingY = 0,
-        easingX = 0;
-
-    if (direction === 'UP' || direction === 'DOWN') {
-      easingValue = this._easeInOutQuad(this._iteration, 0, this._tileHeight, this._totalIterations);
-      easingY = this._directionLookup[direction] * easingValue;
-    } else {
-      easingValue = this._easeInOutQuad(this._iteration, 0, this._tileWidth, this._totalIterations);
-      easingX = this._directionLookup[direction] * easingValue;
-    }
-
-    this.context.closePath();
-
-    this.context.clearRect(
-      this._tileWidth * selectedTile[0],
-      this._tileHeight * selectedTile[1],
-      this._tileWidth,
-      this._tileHeight);
-
-    this.context.drawImage(
-      this.imageObj,
-      this._tileWidth * this.state.goalGrid[selectedTile[2]][0], // tile bg position x
-      this._tileHeight * this.state.goalGrid[selectedTile[2]][1], // tile bg position y
-      this._tileWidth,
-      this._tileHeight,
-      this._tileWidth * selectedTile[0] + easingX, // tile position X
-      this._tileHeight * selectedTile[1] + easingY, // tile position Y
-      this._tileWidth,
-      this._tileHeight);
-
-    if (this._iteration < this._totalIterations) {
-      this._iteration++;
-      requestAnimationFrame(() => this.redrawMovedTile(selectedTile, nextMove));
-    } else {
-      this._iteration = 0;
-    }
   }
 }
 
