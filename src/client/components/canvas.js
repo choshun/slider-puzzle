@@ -29,6 +29,8 @@ class Canvas {
     this._height = 0;
     this._tileWidth = 0;
     this._tileHeight = 0;
+    this._bgOffsetY = 0;
+    this._bgOffsetX = 0;
     this._directionLookup = {
       'UP': - 1,
       'DOWN': + 1,
@@ -94,8 +96,10 @@ class Canvas {
 
     this.context.drawImage(
       this.imageObj,
-      this._tileWidth * this.state.goalGrid[selectedTile[2]][0], // tile bg position x
-      this._tileHeight * this.state.goalGrid[selectedTile[2]][1], // tile bg position y
+      (this._tileWidth * this.state.goalGrid[selectedTile[2]][0]) -
+          this._bgOffsetX, // tile bg position x
+      (this._tileHeight * this.state.goalGrid[selectedTile[2]][1]) -
+          this._bgOffsetY, // tile bg position y
       this._tileWidth,
       this._tileHeight,
       this._tileWidth * selectedTile[0] + easingX, // tile position X
@@ -111,6 +115,8 @@ class Canvas {
     }
   }
 
+  // TODO, for resize I may wanna not have imageWidth/appwidth stuff in here,
+  // have as seperate function
   _loadImage(image) {
     this.imageObj = new Image();
 
@@ -121,15 +127,15 @@ class Canvas {
           imageHeight = image.height,
           appElement = this.appElement,
           smallX = appElement.offsetWidth < imageWidth,
-          smallY = appElement.offsetHeight < imageHeight;
+          smallY = appElement.offsetHeight < imageHeight,
+          offsetY = (appElement.offsetHeight - imageHeight) / 2,
+          offsetX = (appElement.offsetWidth - imageWidth) / 2;
 
       if (smallX) {
         this.canvas.classList.add('small-x');
         // kinda jenky, adding small-x makes it position: fixed,
         // left: 0. Flex box no longer works, adding the offset
-        var smallVerticalOffset = (!smallY) ?
-            (appElement.offsetHeight - imageHeight) / 2 : 0;
-        this.canvas.style.top = smallVerticalOffset + 'px';
+        this.canvas.style.top = (!smallY) ? offsetY + 'px' : 0;
       }
 
       this._width = (smallX) ? appElement.offsetWidth : imageWidth;
@@ -139,19 +145,24 @@ class Canvas {
 
       this.canvas.setAttribute('height', this._height);
       this.canvas.setAttribute('width', this._width);
-      this._drawTiles(this.imageObj, false);
+      this._drawTiles(offsetY, offsetX);
     };
 
     this.imageObj.src = this.state.canvas[0].image;
   }
 
-  _drawTiles(imageObj, draw, selectedTile) {
+  _drawTiles(offsetY, offsetX) {
     var i = 0,
         j = 0,
         count = 0;
 
     this.context.font = "30px Helvetica";
     this.context.fillStyle = "#ff00ff";
+
+    // TODO: maybe do before passed,
+    // but it messes up canvas centering first try
+    this._bgOffsetX = (offsetX < 0) ? offsetX : 0,
+    this._bgOffsetY = (offsetY < 0) ? offsetY : 0;
 
     for (j = 0; j < this.gridSize; j++) {
       for (i = 0; i < this.gridSize; i++) {
@@ -172,8 +183,8 @@ class Canvas {
 
           this.context.drawImage(
             this.imageObj,
-            this._tileWidth * i, // tile bg position x
-            this._tileHeight * j, // tile bg position y
+            (this._tileWidth * i) - this._bgOffsetX, // tile bg position x
+            (this._tileHeight * j) - this._bgOffsetY, // tile bg position y
             this._tileWidth,
             this._tileHeight,
             this._tileWidth * placementX, // tile position x
