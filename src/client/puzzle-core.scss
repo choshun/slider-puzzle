@@ -10,11 +10,15 @@ main,
 
 }
 
+main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .scene {
-  position: fixed;
-  top: 0;
-  left: 0;
-  opacity: .7;
+  height: auto;
+  width: auto;
 }
 
 img {
