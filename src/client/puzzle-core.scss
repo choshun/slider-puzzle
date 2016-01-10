@@ -19,6 +19,11 @@ main {
 .scene {
   height: auto;
   width: auto;
+
+  &.small-x {
+    position: fixed;
+    left: 0;
+  }
 }
 
 img {
