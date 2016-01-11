@@ -5,6 +5,14 @@
 // - update grid after all moved are done
 
 
+    
+    // !!! TODO replace all foreaches with:
+    // http://jsperf.com/for-vs-foreach/66
+
+
+  // maybe only share global state explicitly?
+  // so components don't need to maintain global state internaly.
+
 // 1/6/16 TODO
 // move
 //  get canvas to move - DONE!
@@ -35,7 +43,7 @@
 //      center canvas element in center of page -DONE
 //      If image is too big make tiles fit to 100% viewport -DONE
 //        center image in smaller viewport -DONE
-//      when resize repaint canvas
+//      when resize repaint canvas - DONE
 //  
 //    add image as blurred bg
 //    when canvas paints after image selection make it 
@@ -46,20 +54,29 @@
 //    make a modal with passed in elements,
 //      render element in model
 //      ie {
-          "p": "good job",
-          "button": {
-            "value": 25,
-            "text": "shuffle amount"
-          }
+        "p": "good job",
+        "button": {
+          "value": 25,
+          "text": "shuffle amount"
         }
+      }
+      or just pass in elements... that's easier - DONE
 
-        or just pass in elements... that's easier
+// 1/10/16 TODO
+    modal
+      Style modal/global elements
+      Intro when you click a radio it drives the global state
+      When you hit looks good it closes
+
+    puzzle
+      retry button with presets - DONE
 */
 
 require('./puzzle-core.scss');
 
 import GlobalState from './components/global-state';
 import PuzzleSelect from './components/puzzle-select';
+import Modal from './components/modal';
 import Canvas from './components/canvas';
 import GridLogic from './components/grid-logic';
 import Solver from './components/solver';
@@ -70,21 +87,45 @@ import Solver from './components/solver';
                           window.webkitRequestAnimationFrame ||
                           window.msRequestAnimationFrame;
 
-  // TODO: 
-  /*
-    Thinking 
-    3,4,5 grid size and
-    15 30 50 for shuffling
-
-  */
   var initialState = {
-    gridSize: 5,
+    gridSize: 4,
     shuffleTimes: 50,
     appElement: document.getElementById('app'),
+    puzzleConfig: {
+      player: 'Broseph',
+      size: [
+        {
+          name: '3*3',
+          value: 3
+        },
+        {
+          name: '4*4',
+          value: 4
+        },
+        {
+          name: '5*5',
+          value: 5
+        },
+      ],
+      shuffle: [
+        {
+          name: 'A little - 15',
+          value: 15
+        },
+        {
+          name: 'An amount - 30',
+          value: 30
+        },
+        {
+          name: 'The limit at which my solver consistently works - 50',
+          value: 50
+        },
+      ]
+    },
     canvas: [
       {
-        'image': '/images/weed-erryday.jpg',
-        'name': 'smaller cat'
+        'image': '/images/sc4a.jpg',
+        'name': 'art'
       },
       {
         'image': '/images/sc4a.jpg',
@@ -103,8 +144,8 @@ import Solver from './components/solver';
         'name': 'surfing'
       },
       {
-        'image': '/images/weed-erryday.jpg',
-        'name': 'cat!'
+        'image': '/images/bear-shark-unicornsurfing.jpg',
+        'name': 'surfing'
       },
       {
         'image': '/images/sc4a.jpg',
@@ -136,16 +177,8 @@ import Solver from './components/solver';
         'name': 'cat!'
       },
       {
-        'image': '/images/cat1.jpg',
+        'image': '/images/ps-battle1.jpg',
         'name': 'cat!'
-      },
-      {
-        'image': '/images/cat.jpg',
-        'name': 'cat!'
-      },
-      {
-        'image': '/images/small-cat.png',
-        'name': 'smaller cat'
       },
       {
         'image': '/images/sc4a.jpg',
@@ -182,10 +215,9 @@ import Solver from './components/solver';
         'name': 'cat!'
       },
       {
-        'image': '/images/cat.jpg',
+        'image': '/images/shmeh.jpg',
         'name': 'cat!'
       },
-
       {
         'image': '/images/pretty.jpg',
         'name': 'smaller cat'
@@ -241,6 +273,7 @@ import Solver from './components/solver';
   // event? (needs to change/use gridlogic.move and canvas.move from solver)
   var globalState = new GlobalState(initialState);
   var puzzleSelect = new PuzzleSelect(initialState);
+  var modal = new Modal(initialState);
   var gridLogic = new GridLogic(globalState);
   var canvas = new Canvas(globalState, gridLogic);
   var solver = new Solver(globalState, gridLogic, canvas);
@@ -248,9 +281,14 @@ import Solver from './components/solver';
   var resizeTimeout;
 
   function init() {
-    puzzleSelect.init();
+    puzzleSelect.render();
+    // modal.renderIntro();
+
+    // lock viewport
+    // document.body.classList.add('locked');
 
     bindPuzzleSelection();
+    bindModalSelection();
 
     //startPuzzle();
 
@@ -258,50 +296,63 @@ import Solver from './components/solver';
   }
 
   function bindPuzzleSelection() {
-    var i;
+    var puzzleList = document.querySelector('.puzzle-list');
 
-    var puzzles = document.querySelectorAll('.puzzle');
+    puzzleList.addEventListener('click', function(event) {
+      document.body.classList.add('locked');
+      startPuzzle(event.target.getAttribute('id'));
+    });
+  }
 
-    for (i = 0; i < puzzles.length; i++) {
-      puzzles[i].addEventListener('click', function(event) {
-        startPuzzle(this.getAttribute('id'));
-      });
-    }
+  function bindModalSelection() {
+
+  }
+
+  function buildPuzzle() {
+
+    // Make a shuffled grid
+    gridLogic.init();
+
+    globalState.setProperty('grid', gridLogic.shuffledGrid);
+    globalState.setProperty('goalGrid', gridLogic.goalGrid);
+    globalState.setProperty('emptyTile', gridLogic.emptyTile);
+
+    // Get ready to solve
+    solver.init(globalState.state);
   }
 
   function startPuzzle(selectedImage) {
     // Set up the board
     document.querySelector('main').classList.add('puzzle-time');
 
-    gridLogic.init();
+    buildPuzzle();
 
-    // TODO Might not need this, can just reference this in gridLogic.grid
-    globalState.setProperty('grid', gridLogic.shuffledGrid);
-    globalState.setProperty('goalGrid', gridLogic.goalGrid);
-    globalState.setProperty('emptyTile', gridLogic.emptyTile);
-
-    // TODO maybe not do init, and just fire them directly so 
-    // it's easier to read?
-
-    // Paint the sliding puzzle using global state's shuffled grid
+    // paint the puzzle
     canvas.init(selectedImage);
 
-    // Get ready to solve
-    solver.init(globalState.state);
-
     bindSolveButton();
+    bindRetryButton();
     bindMove();
     bindResize();
   }
 
-  // maybe only share global state explicitly? like this?
-  // so components don't need to maintain global state internaly.
+  function bindRetryButton() {
+    document.querySelector('.retry-button').addEventListener('click', (event) => {
+      // destroy canvas
+      globalState.state.appElement.removeChild(canvas.canvas);
+      buildPuzzle();
+      
+      // paint the puzzle
+      canvas.init();
+    });
+  }
 
   function bindSolveButton() {
     solver.solveButton.addEventListener('click', (event) => {
       var solveInterval,
           moveCount = 0;
       
+      // just pass in global, with global functions and everything
       solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
       
       // TODO: will be replaced with a wroker, so postMessage stuff
@@ -332,17 +383,20 @@ import Solver from './components/solver';
 
         // TODO: Again not DRY, used in gridlogic and solver
         // START should be a global function passed into stuff that needs it
+
         var toPosition = globalState.state.emptyTile;
 
         globalState.state.emptyTile = nextMovePosition;
         globalState.state.grid[nextMoveTile] = toPosition;
         // END should be a global function passed into stuff that needs it
 
-        // !!!TODO if solver.isSameArray(globalState.state.grid, globalState.state.goalGrid)
-        // show outro/save
+        // if you solved it 
+        if (solver.isSameArray(globalState.state.grid, globalState.state.goalGrid)) {
+          console.log('done!');
+          // show outro/save
+        }
+        
       }
-
-      // console.log('NEXT', nextMove);
     });
   }
 
@@ -352,8 +406,6 @@ import Solver from './components/solver';
 
       resizeTimeout = setTimeout(() => {
         canvas.init();
-
-        console.log('resize?');
       }, 400);
     });
   }
