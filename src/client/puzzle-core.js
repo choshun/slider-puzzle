@@ -76,7 +76,7 @@
 
   1/11/16 TODO
     close puzzle
-    puzzle - finally do puzzle animation
+    puzzle - finally do puzzle animation - DONE
     jsdocs
     readme
     gjslint, csscomb... BOOM
@@ -382,6 +382,7 @@ import Solver from './components/solver';
       
       // paint the puzzle
       canvas.init(app);
+      steps = 0;
 
       if (event.target.classList.contains('in-modal')) {
         modal.modal.classList.remove(OPEN_CLASS);
