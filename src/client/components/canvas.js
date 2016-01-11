@@ -21,7 +21,7 @@ class Canvas {
     this._totalIterations = 10;
 
     // For canvas grid
-    this.gridSize = this.state.gridSize;
+    this.gridSize
 
     // set after image is loaded
     this._width = 0;
@@ -38,7 +38,8 @@ class Canvas {
     };
   }
 
-  init(selectedImage) {
+  init(globalObject, selectedImage) {
+    this.gridSize = globalObject.state.gridSize;
     this.canvas = this._createCanvas();
     this.context = this.canvas.getContext('2d');
 
@@ -148,6 +149,8 @@ class Canvas {
       this._width = (smallX) ? appElement.offsetWidth : imageWidth;
       this._height = (smallY) ? appElement.offsetHeight : imageHeight;
       this._tileWidth = this._width / this.gridSize;
+
+      console.log('canvas gridSize', this.gridSize);
       this._tileHeight = this._height / this.gridSize;
 
       this.canvas.setAttribute('height', this._height);

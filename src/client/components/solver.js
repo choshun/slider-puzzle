@@ -16,7 +16,7 @@
  */
 class Solver {
   /*
-   * @constructs Canvas
+   * @constructs Solver
    * @param {Object} state options
    */
   constructor(globalState, gridLogic) {

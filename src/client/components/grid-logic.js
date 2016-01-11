@@ -8,25 +8,23 @@ class GridLogic {
    * @constructs GridLogic
    * @param {Object} options
    */
-  constructor(globalState) {
-    this.globalState = globalState || {};
-    this.state = globalState.state || {};
-
-    this.gridSize = this.state.gridSize || {};
+  constructor() {
+    this.gridSize;
     this.goalGrid;
     this.shuffledGrid;
-
-    // assume emptyTile is the last tile.
     this.emptyTile;
     this.allowableMoves;
     this.shuffleMoves;
     this.lastDirection;
   }
 
-  init() {
+  init(globalState) {
+    this.gridSize = globalState.state.gridSize || {};
+
+    // assume emptyTile is the last tile.
     this.emptyTile = [this.gridSize - 1, this.gridSize - 1]
     this.goalGrid = this._createGrid(this.gridSize);
-    this.shuffledGrid = this._shuffle(this.goalGrid.slice(), this.state.shuffleTimes);
+    this.shuffledGrid = this._shuffle(this.goalGrid.slice(), globalState.state.shuffleTimes);
   }
 
   _createGrid(gridSize) {
