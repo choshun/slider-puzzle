@@ -161,15 +161,15 @@ footer {
     width: 100%;
     z-index: -1;
   }
-  &.open {
+  &._open {
     display: block;
   }
 }
 
-.locked {
+._locked {
   overflow: hidden;
 }
 
-.hidden {
+._hidden {
   display: none;
 }
