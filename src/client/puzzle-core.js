@@ -64,13 +64,17 @@
 
 // 1/10/16 TODO
     modal
-      Style modal/global elements
+      Style modal/global elements - DONE
       Intro when you click a radio it drives the global state - DONE
       When you hit looks good it closes - DONE
+      show something when you hit solve "try again"
+      show something when you win "you did it in 5 moves!"
+      show something when solve borks
 
     puzzle
       retry button with presets - DONE,
       fire when user gets to goal - DONE
+      hint button - DONE
 */
 
 require('./puzzle-core.scss');
@@ -279,7 +283,9 @@ import Solver from './components/solver';
   var canvas = new Canvas(globalState, gridLogic);
   var solver = new Solver(globalState, gridLogic);
 
-  var resizeTimeout;
+  var resizeTimeout,
+      steps = 0,
+      hintButton = document.querySelector('.hint-button');
 
   function init() {
     puzzleSelect.render();
@@ -304,6 +310,7 @@ import Solver from './components/solver';
 
     bindSolveButton();
     bindRetryButton();
+
     bindMove();
     bindResize();
   }
@@ -320,6 +327,7 @@ import Solver from './components/solver';
 
     // Get ready to solve
     solver.init(globalState.state);
+    bindHintButton();
   }
 
   function bindPuzzleSelection() {
@@ -351,10 +359,41 @@ import Solver from './components/solver';
     document.querySelector('.retry-button').addEventListener('click', (event) => {
       // destroy canvas
       globalState.state.appElement.removeChild(canvas.canvas);
+      hintButton.classList.remove('hidden');
       buildPuzzle();
       
       // paint the puzzle
       canvas.init(globalState);
+    });
+  }
+
+  function bindHintButton() {
+    var origText = hintButton.textContent;
+
+    hintButton.addEventListener('click', (event) => {
+      var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid),
+          i,
+          ranked = [],
+          hint;
+
+      for (i = 0; i < moves.length; i++) {
+        var fringed = solver.makeGrid(moves[i], globalState.state.grid.slice(), globalState.state.emptyTile.slice()),
+            rank = solver.evaluation(fringed.grid, globalState.state.goalGrid, 1);
+        ranked.push({
+          'rank': rank,
+          'move': i
+        });
+      }
+
+      ranked = solver.sort(ranked, 'rank');
+
+      // ranked[0] is lowest rank after sort (see solver.sort)
+      hint = moves[ranked[0].move][1];
+      hintButton.innerHTML = `GO ${hint}!`;
+
+      setTimeout(() => {
+        hintButton.innerHTML = origText;
+      }, 1500);
     });
   }
 
@@ -372,6 +411,7 @@ import Solver from './components/solver';
       
       // TODO: A crutch for now, when you hit solve after solving it borks
       solver.solveButton.classList.add('hidden');
+      hintButton.classList.add('hidden');
 
       // just pass in global, with global functions and everything
       solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
@@ -402,6 +442,8 @@ import Solver from './components/solver';
         var nextMovePosition = nextMove[0],
             nextMoveTile = nextMove[2],
             toPosition = globalState.state.emptyTile;
+
+        steps++;
 
         // update grid
         globalState.state.emptyTile = nextMovePosition;
