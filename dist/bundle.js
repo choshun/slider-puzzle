@@ -52,19 +52,19 @@
 
 	var _componentsGlobalState2 = _interopRequireDefault(_componentsGlobalState);
 
-	var _componentsCanvas = __webpack_require__(2);
+	var _componentsCanvas = __webpack_require__(3);
 
 	var _componentsCanvas2 = _interopRequireDefault(_componentsCanvas);
 
-	var _componentsGridLogic = __webpack_require__(3);
+	var _componentsGridLogic = __webpack_require__(4);
 
 	var _componentsGridLogic2 = _interopRequireDefault(_componentsGridLogic);
 
-	var _componentsSolver = __webpack_require__(4);
+	var _componentsSolver = __webpack_require__(5);
 
 	var _componentsSolver2 = _interopRequireDefault(_componentsSolver);
 
-	__webpack_require__(5);
+	__webpack_require__(6);
 
 	(function () {
 	  requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
@@ -78,6 +78,10 @@
 	    }]
 	  };
 
+	  // TODO Not liking the dependancies
+	  // maybe have allowable moves in global-state, and just call it
+	  // application? Maybe also move... have move be the only custom
+	  // event? (needs to change/use gridlogic.move and canvas.move from solver)
 	  var globalState = new _componentsGlobalState2['default'](initialState);
 	  var gridLogic = new _componentsGridLogic2['default'](globalState);
 	  var canvas = new _componentsCanvas2['default'](globalState, gridLogic);
@@ -176,7 +180,8 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 2 */
+/* 2 */,
+/* 3 */
 /***/ function(module, exports) {
 
 	/*
@@ -426,7 +431,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	/*
@@ -621,7 +626,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	/*
@@ -713,7 +718,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	// removed by extract-text-webpack-plugin
