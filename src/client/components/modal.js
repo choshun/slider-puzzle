@@ -10,7 +10,6 @@ class Modal {
     this._shuffles = [ [ 'yes', true ], [ 'no', false ] ];
   }
 
-  // TODO if modal is there then just html the contents, else create
   _render(contents, type) {
     if (this.modal === undefined) {
       this.modal = document.createElement('section');
@@ -21,11 +20,25 @@ class Modal {
     this.state.appElement.appendChild(this.modal);
   }
 
+  renderWinning(steps) {
+    var html = `
+      <h1>A winner is you!</h1>
+
+      <p>You did it in an astonishing ${steps} ${steps > 1 ? 'steps' : 'step'}.</p>
+
+      <p>Try again?!?!?</p>
+
+      <button id="retry" class="button retry-button in-modal">RETRY</button>
+    `;
+
+    this._render(html, 'modal-solved');
+  }
+
   renderSolved(solutionLength) {
     var html = `
       <h1>You were so close!</h1>
 
-      <p>It took us ${solutionLength} moves to solve</p>
+      <p>It took us ${solutionLength} ${solutionLength > 1 ? 'moves' : 'move'} to solve</p>
 
       <p>Try again?!?!?</p>
 
