@@ -1,5 +1,6 @@
 var path = require('path');
 var ExtractTextPlugin = require('extract-text-webpack-plugin');
+var webpack = require('webpack');
 
 module.exports = {
   entry: path.resolve(__dirname, '../src/client/puzzle-core.js'),
@@ -16,10 +17,6 @@ module.exports = {
         loader: 'babel'
       },
       {
-        test: /\.jsx$/,
-        loader: 'babel'
-      },
-      {
         test: /\.scss$/,
         loader: ExtractTextPlugin.extract('css!sass')
       }
@@ -33,6 +30,9 @@ module.exports = {
   plugins: [
     new ExtractTextPlugin('style.css', {
         allChunks: true
+    }),
+    new webpack.optimize.UglifyJsPlugin({
+      minimize: true
     })
   ]
 };
