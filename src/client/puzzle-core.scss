@@ -166,6 +166,17 @@ footer {
   }
 }
 
+.modal-solved {
+  &:before {
+    opacity: .65;
+  }
+
+  .button {
+    float: left;
+    margin: .8em 0 0;
+  }
+}
+
 ._locked {
   overflow: hidden;
 }

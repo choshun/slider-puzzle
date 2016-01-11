@@ -302,7 +302,7 @@ import Solver from './components/solver';
     canvas.init(app, selectedImage);
 
     bindSolveButton();
-    bindRetryButton();
+    bindRetryButton(document.querySelector('footer'));
 
     bindMove();
     bindResize();
@@ -347,15 +347,20 @@ import Solver from './components/solver';
     });
   }
 
-  function bindRetryButton() {
-    document.querySelector('.retry-button').addEventListener('click', (event) => {
+  function bindRetryButton(parent) {
+    parent.querySelector('.retry-button').addEventListener('click', (event) => {
       // destroy canvas
       app.state.appElement.removeChild(canvas.canvas);
       solver.hintButton.classList.remove(HIDDEN_CLASS);
+      gridLogic.retryButton.classList.remove(HIDDEN_CLASS);
       buildPuzzle();
       
       // paint the puzzle
       canvas.init(app);
+
+      if (event.target.classList.contains('in-modal')) {
+        modal.modal.classList.remove(OPEN_CLASS);
+      }
     });
   }
 
@@ -403,15 +408,29 @@ import Solver from './components/solver';
       
       solver.solveButton.classList.add(HIDDEN_CLASS);
       solver.hintButton.classList.add(HIDDEN_CLASS);
+      gridLogic.retryButton.classList.add(HIDDEN_CLASS);
       solver.solve(app.state.grid, app.state.goalGrid, app.state.emptyTile);
       
+      if (solver.solution === 'fail') {
+        modal.renderError();
+        bindRetryButton(modal.modal);
+        return;
+      }
+
       // TODO: will be replaced with a wroker, so postMessage stuff
       solveInterval = setInterval(() => {
         
         if (solver.solution !== undefined) {
-
+          
           if (moveCount >= solver.solution.length) {
+            
             clearInterval(solveInterval);
+            
+            setTimeout(() => {
+              modal.renderSolved(solver.solution.length);
+              bindRetryButton(modal.modal);
+            }, 200);
+            
             return;
           }
 
