@@ -149,10 +149,7 @@ class Canvas {
       this._width = (smallX) ? appElement.offsetWidth : imageWidth;
       this._height = (smallY) ? appElement.offsetHeight : imageHeight;
       this._tileWidth = this._width / this.gridSize;
-
-      console.log('canvas gridSize', this.gridSize);
       this._tileHeight = this._height / this.gridSize;
-
       this.canvas.setAttribute('height', this._height);
       this.canvas.setAttribute('width', this._width);
       this._drawTiles(offsetY, offsetX);
@@ -266,6 +263,8 @@ class Canvas {
   }
 }
 
+export default Canvas;
+
 // var canvas = document.querySelector("canvas"),
 //     ctx = canvas.getContext("2d"),
 //     w = canvas.width,
@@ -367,5 +366,4 @@ class Canvas {
 
 // console.log('CANVAS STATE', app.state);
 
-export default Canvas;
 

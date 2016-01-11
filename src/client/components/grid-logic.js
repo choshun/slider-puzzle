@@ -52,8 +52,6 @@ class GridLogic {
       // get next allowable moves
       this.allowableMoves = this.getAllowableMoves(this.emptyTile, grid);
 
-      // console.log('ALLOWABLE', this.allowableMoves);
-
       // randomly choose an allowable move
       grid = this._moveToRandomTile(grid, this.allowableMoves);
     }
@@ -116,8 +114,6 @@ class GridLogic {
     // switch emptyTile and moved tile [x, y]
     grid[tile] = this.emptyTile;
     this.emptyTile = fromPosition;
-
-    // console.log('EMPTY?', this.emptyTile);
 
     return grid;
   }
