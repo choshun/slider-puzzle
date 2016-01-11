@@ -278,6 +278,7 @@ import Solver from './components/solver';
   const LOCKED_CLASS = '_locked';
   const OPEN_CLASS = '_open';
   const HIDDEN_CLASS = '_hidden';
+  const MODAL_TIMEOUT = 200;
 
   function init() {
     // creates puzzle image list
@@ -332,6 +333,12 @@ import Solver from './components/solver';
       document.body.classList.add(LOCKED_CLASS);
       startPuzzle(selectedPuzzle);
     });
+  }
+
+  function hideButtons() {
+    solver.solveButton.classList.add(HIDDEN_CLASS);
+    solver.hintButton.classList.add(HIDDEN_CLASS);
+    gridLogic.retryButton.classList.add(HIDDEN_CLASS);
   }
 
   function bindModalSelection() {
@@ -406,9 +413,7 @@ import Solver from './components/solver';
       var solveInterval,
           moveCount = 0;
       
-      solver.solveButton.classList.add(HIDDEN_CLASS);
-      solver.hintButton.classList.add(HIDDEN_CLASS);
-      gridLogic.retryButton.classList.add(HIDDEN_CLASS);
+      hideButtons();
       solver.solve(app.state.grid, app.state.goalGrid, app.state.emptyTile);
       
       if (solver.solution === 'fail') {
@@ -429,7 +434,7 @@ import Solver from './components/solver';
             setTimeout(() => {
               modal.renderSolved(solver.solution.length);
               bindRetryButton(modal.modal);
-            }, 200);
+            }, MODAL_TIMEOUT);
             
             return;
           }
@@ -459,10 +464,14 @@ import Solver from './components/solver';
 
         // if you solved it 
         if (solver.isSameArray(app.state.grid, app.state.goalGrid)) {
-          console.log('done!');
-          // show outro/save
+          
+          setTimeout(() => {
+            modal.renderWinning(steps);
+            hideButtons();
+            bindRetryButton(modal.modal);
+            steps = 0;
+          }, MODAL_TIMEOUT);
         }
-        
       }
     });
   }
