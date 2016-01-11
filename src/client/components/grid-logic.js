@@ -17,11 +17,13 @@ class GridLogic {
     this.allowableMoves;
     this.shuffleMoves;
     this.lastDirection;
+    this.retryButton;
   }
 
   init(app) {
     this.app = app || {};
     this.gridSize = app.state.gridSize || {};
+    this.retryButton = document.querySelector('footer').querySelector('.retry-button');
 
     // assume emptyTile is the last tile.
     this.emptyTile = [this.gridSize - 1, this.gridSize - 1]
