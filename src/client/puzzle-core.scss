@@ -5,6 +5,12 @@ html {
   font-weight: 100;
 }
 
+@media (max-width: 500px) {
+  html {
+    font-size: 12px;
+  }
+}
+
 body,
 html,
 main,
@@ -145,7 +151,7 @@ footer {
 .modal {
   display: none;
   left: 50%;
-  margin-left: -25%;
+  margin-left: -20%;
   max-width: 50%;
   position: fixed;
   top: 15%;
@@ -170,7 +176,6 @@ footer {
   &:before {
     opacity: .65;
   }
-
   .button {
     float: left;
     margin: .8em 0 0;
