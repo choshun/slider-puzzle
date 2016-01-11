@@ -65,8 +65,8 @@
 // 1/10/16 TODO
     modal
       Style modal/global elements
-      Intro when you click a radio it drives the global state
-      When you hit looks good it closes
+      Intro when you click a radio it drives the global state - DONE
+      When you hit looks good it closes - DONE
 
     puzzle
       retry button with presets - DONE,
@@ -293,6 +293,33 @@ import Solver from './components/solver';
     bindModalSelection();
   }
 
+  function startPuzzle(selectedImage) {
+    document.querySelector('main').classList.add('puzzle-time');
+    
+    // set up the board
+    buildPuzzle();
+
+    // paint the puzzle
+    canvas.init(globalState, selectedImage);
+
+    bindSolveButton();
+    bindRetryButton();
+    bindMove();
+    bindResize();
+  }
+  
+  function buildPuzzle() {
+    // Make a shuffled grid
+    gridLogic.init(globalState);
+
+    globalState.setProperty('grid', gridLogic.shuffledGrid);
+    globalState.setProperty('goalGrid', gridLogic.goalGrid);
+    globalState.setProperty('emptyTile', gridLogic.emptyTile);
+
+    // Get ready to solve
+    solver.init(globalState.state);
+  }
+
   function bindPuzzleSelection() {
     var puzzleList = document.querySelector('.puzzle-list');
 
@@ -315,33 +342,6 @@ import Solver from './components/solver';
     });
   }
 
-  function buildPuzzle() {
-    // Make a shuffled grid
-    gridLogic.init(globalState);
-
-    globalState.setProperty('grid', gridLogic.shuffledGrid);
-    globalState.setProperty('goalGrid', gridLogic.goalGrid);
-    globalState.setProperty('emptyTile', gridLogic.emptyTile);
-
-    // Get ready to solve
-    solver.init(globalState.state);
-  }
-
-  function startPuzzle(selectedImage) {
-    // Set up the board
-    document.querySelector('main').classList.add('puzzle-time');
-
-    buildPuzzle();
-
-    // paint the puzzle
-    canvas.init(globalState, selectedImage);
-
-    bindSolveButton();
-    bindRetryButton();
-    bindMove();
-    bindResize();
-  }
-
   function bindRetryButton() {
     document.querySelector('.retry-button').addEventListener('click', (event) => {
       // destroy canvas
@@ -355,8 +355,8 @@ import Solver from './components/solver';
 
   function bindModalCloseButton() {
     document.querySelector('.modal-close').addEventListener('click', (event) => {
-      console.log('boop');
       modal.modal.classList.remove('open');
+      document.body.classList.remove('locked');
     });
   }
 
@@ -387,21 +387,17 @@ import Solver from './components/solver';
 
   function bindMove() {
     globalState.state.appElement.addEventListener('click', (event) => {
-      var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid);
-      var nextMove = canvas.moveTile(event, moves);
+      var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid),
+          nextMove = canvas.moveTile(event, moves);
       
       if (nextMove !== false) {
         var nextMovePosition = nextMove[0],
-            nextMoveTile = nextMove[2];
+            nextMoveTile = nextMove[2],
+            toPosition = globalState.state.emptyTile;
 
-        // TODO: Again not DRY, used in gridlogic and solver
-        // START should be a global function passed into stuff that needs it
-
-        var toPosition = globalState.state.emptyTile;
-
+        // update grid
         globalState.state.emptyTile = nextMovePosition;
         globalState.state.grid[nextMoveTile] = toPosition;
-        // END should be a global function passed into stuff that needs it
 
         // if you solved it 
         if (solver.isSameArray(globalState.state.grid, globalState.state.goalGrid)) {
