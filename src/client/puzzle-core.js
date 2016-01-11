@@ -69,7 +69,8 @@
       When you hit looks good it closes
 
     puzzle
-      retry button with presets - DONE
+      retry button with presets - DONE,
+      fire when user gets to goal - DONE
 */
 
 require('./puzzle-core.scss');
