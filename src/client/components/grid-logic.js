@@ -17,14 +17,17 @@ class GridLogic {
     this.shuffledGrid;
 
     // assume emptyTile is the last tile.
-    this.emptyTile = [this.gridSize - 1, this.gridSize - 1];
+    this.emptyTile;
     this.allowableMoves;
     this.shuffleMoves;
     this.lastDirection;
   }
 
   init() {
+    console.log('retry in grid logic');
+    this.emptyTile = [this.gridSize - 1, this.gridSize - 1]
     this.goalGrid = this._createGrid(this.gridSize);
+
     this.shuffledGrid = this._shuffle(this.goalGrid.slice(), this.state.shuffleTimes);
   }
 
@@ -117,12 +120,6 @@ class GridLogic {
         direction = choice[1], 
         tile = choice[2],
         fromPosition = grid[tile];
-
-    // console.log('CHOICE?', choice);
-
-    // console.log('TILE?', tile);
-
-    // console.log('DIRECTION?', direction);
 
     // keep track so we don't move back and cancel
     // last move

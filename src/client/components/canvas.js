@@ -11,8 +11,8 @@ class Canvas {
     this.state = globalState.state || {};
 
     // Canvas stuff
-    this.canvas = this._createCanvas();
-    this.context = this.canvas.getContext('2d');
+    this.canvas;
+    this.context;
     this.imageObj;
     this.selectedImage;
 
@@ -39,6 +39,9 @@ class Canvas {
   }
 
   init(selectedImage) {
+    this.canvas = this._createCanvas();
+    this.context = this.canvas.getContext('2d');
+
     // paint 
     this.selectedImage = selectedImage || this.selectedImage;
     this._loadImage(this.selectedImage);
