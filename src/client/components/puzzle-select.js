@@ -11,9 +11,7 @@ class PuzzleSelect {
   }
 
   render() {
-    var i,
-        puzzles,
-        section = document.createElement('section'),
+    var section = document.createElement('section'),
         html = `
             <ul class="puzzle-list">
               ${this._images.map(image => `

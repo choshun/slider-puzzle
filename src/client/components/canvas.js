@@ -126,9 +126,7 @@ class Canvas {
     this.imageObj = new Image();
 
     this.imageObj.onload = () => {
-
-      var cover = this._width > this._height ? this._width : this._height,
-          image = this.imageObj,
+      var image = this.imageObj,
           imageWidth = image.width,
           imageHeight = image.height,
           appElement = this.state.appElement,

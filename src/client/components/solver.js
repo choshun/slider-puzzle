@@ -1,17 +1,4 @@
 /*
-  Solves puzzle
-  Gives hints
-*/
-
-/*
-  f(n) = g(n) + h(n)
-  
-  where
-  f(n) is the assigned rank
-  g(n) is generation
-  h(n) is the distance between the tile location and goal 
-*/
-/*
  * @class Solver
  */
 class Solver {
