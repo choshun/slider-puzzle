@@ -44,6 +44,63 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	// - only import public methods, not whole objects. see es6 destructuring
+	// - stuff like next move and canvas stuff might be good to be objects
+	//   ie, nextMoveTile = nextMove[2] is kinda vague
+	// - shuffle button?
+	// - update grid after all moved are done
+
+	// 1/6/16 TODO
+	// move
+	//  get canvas to move - DONE!
+	//    translate e.pagex/y to tiles - DONE!
+	//    fire move on allowable tiles - DONE!
+	//    move to correct tile - DONE!
+	//  get grid to update, making it way easier to debug -DONE!
+	//  * make cursor:pointer on things that can move
+	/**
+	// 1/7/16 TODO
+	// solve
+	//  when you hit solve button, and it's solved, have grid update to solved state - DONE
+	//  make each grid have it's history for open/closed grid path comparisons
+	//  rewrite solve algorithm to EXACTLY what the innernet said it should be
+	//    not on open or closed - DONE
+	//    on closed - :(
+	//    on open - DONE
+	//  test for same rank trees, this is where it hangs all the time - kinda done? should be addressed by prev todo
+	//  make sure solve doesn't fire until final tree is made
+	//    right now I add to solver.solved as it loops, this may balloon when
+	//    trees expand - DONE(ish)
+	//  put in worker
+
+	//  1/9/16 TODO
+	//  canvas prettifying
+	//    make responsive
+	//      center any uploaded image in canvas based on image size - DONE
+	//      center canvas element in center of page -DONE
+	//      If image is too big make tiles fit to 100% viewport -DONE
+	//        center image in smaller viewport -DONE
+	//      when resize repaint canvas
+	//  
+	//    add image as blurred bg
+	//    when canvas paints after image selection make it 
+	//      have a cool animation 
+	//      (different global-alphas and maybe position)
+	//
+	//  intro/outro
+	//    make a modal with passed in elements,
+	//      render element in model
+	//      ie {
+	          "p": "good job",
+	          "button": {
+	            "value": 25,
+	            "text": "shuffle amount"
+	          }
+	        }
+
+	        or just pass in elements... that's easier
+	*/
+
 	'use strict';
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -52,57 +109,272 @@
 
 	var _componentsGlobalState2 = _interopRequireDefault(_componentsGlobalState);
 
-	var _componentsCanvas = __webpack_require__(2);
+	var _componentsPuzzleSelect = __webpack_require__(2);
+
+	var _componentsPuzzleSelect2 = _interopRequireDefault(_componentsPuzzleSelect);
+
+	var _componentsCanvas = __webpack_require__(3);
 
 	var _componentsCanvas2 = _interopRequireDefault(_componentsCanvas);
 
-	var _componentsGridLogic = __webpack_require__(3);
+	var _componentsGridLogic = __webpack_require__(4);
 
 	var _componentsGridLogic2 = _interopRequireDefault(_componentsGridLogic);
 
-	var _componentsSolver = __webpack_require__(4);
+	var _componentsSolver = __webpack_require__(5);
 
 	var _componentsSolver2 = _interopRequireDefault(_componentsSolver);
 
-	__webpack_require__(5);
+	__webpack_require__(6);
 
 	(function () {
 	  requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
+	  // TODO:
+	  /*
+	    Thinking 
+	    3,4,5 grid size and
+	    15 30 50 for shuffling
+	   */
 	  var initialState = {
-	    gridSize: 3,
-	    shuffleTimes: 1,
+	    gridSize: 5,
+	    shuffleTimes: 50,
+	    appElement: document.getElementById('app'),
 	    canvas: [{
+	      'image': '/images/weed-erryday.jpg',
+	      'name': 'smaller cat'
+	    }, {
 	      'image': '/images/sc4a.jpg',
-	      'name': 'test1'
+	      'name': 'art'
+	    }, {
+	      'image': '/images/cat1.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/cat.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/bear-shark-unicornsurfing.jpg',
+	      'name': 'surfing'
+	    }, {
+	      'image': '/images/weed-erryday.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/sc4a.jpg',
+	      'name': 'art'
+	    }, {
+	      'image': '/images/cat.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/cat1.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/cat.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/small-cat.png',
+	      'name': 'smaller cat'
+	    }, {
+	      'image': '/images/cat1.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/ps-battle1.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/cat1.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/cat.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/small-cat.png',
+	      'name': 'smaller cat'
+	    }, {
+	      'image': '/images/sc4a.jpg',
+	      'name': 'art'
+	    }, {
+	      'image': '/images/cat1.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/cat.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/small-cat.png',
+	      'name': 'smaller cat'
+	    }, {
+	      'image': '/images/pretty.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/sc4a.jpg',
+	      'name': 'art'
+	    }, {
+	      'image': '/images/cat.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/shmeh.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/cat.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/pretty.jpg',
+	      'name': 'smaller cat'
+	    }, {
+	      'image': '/images/shmeh.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/ps-battle1.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/shmeh.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/cat.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/ps-battle1.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/shmeh.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/cat.jpg',
+	      'name': 'cat!'
+	    }, {
+	      'image': '/images/small-cat.png',
+	      'name': 'smaller cat'
+	    }, {
+	      'image': '/images/bear-shark-unicornsurfing.jpg',
+	      'name': 'surfing'
 	    }]
 	  };
 
+	  // TODO ok, put allowable in application, call it find fringe, sounds fancier
+	  // have move in app, but define and assign it in here, core.
+
+	  // remember, last move is assigned somewhere weird in gridlogic
+
+	  // TODO Not liking the dependancies
+	  // maybe have allowable moves in global-state, and just call it
+	  // application? Maybe also move... have move be the only custom
+	  // event? (needs to change/use gridlogic.move and canvas.move from solver)
 	  var globalState = new _componentsGlobalState2['default'](initialState);
+	  var puzzleSelect = new _componentsPuzzleSelect2['default'](initialState);
 	  var gridLogic = new _componentsGridLogic2['default'](globalState);
 	  var canvas = new _componentsCanvas2['default'](globalState, gridLogic);
 	  var solver = new _componentsSolver2['default'](globalState, gridLogic, canvas);
 
-	  // Set up the board
-	  gridLogic.init();
+	  var resizeTimeout;
 
-	  // TODO Might not need this, can just reference this in gridLogic.grid
-	  globalState.setProperty('grid', gridLogic.shuffledGrid);
-	  globalState.setProperty('goalGrid', gridLogic.goalGrid);
-	  globalState.setProperty('emptyTile', gridLogic.emptyTile);
+	  function init() {
+	    puzzleSelect.init();
 
-	  // TODO maybe not do init, and just fire them directly so
-	  // it's easier to read?
-	  // Paint the sliding puzzle using global state's shuffled grid
-	  canvas.init();
+	    bindPuzzleSelection();
 
-	  // Get ready to solve
-	  solver.init();
+	    //startPuzzle();
+	  }
 
-	  //wire canvas to click, and inject allowable moves
-	  // canvas.appElement.on('click', function() {
-	  // canvas.move (which triggers gridlogic.move?)
-	  //});
+	  function bindPuzzleSelection() {
+	    var i;
+
+	    var puzzles = document.querySelectorAll('.puzzle');
+
+	    for (i = 0; i < puzzles.length; i++) {
+	      puzzles[i].addEventListener('click', function (event) {
+	        startPuzzle(this.getAttribute('id'));
+	      });
+	    }
+	  }
+
+	  function startPuzzle(selectedImage) {
+	    // Set up the board
+	    document.querySelector('main').classList.add('puzzle-time');
+
+	    gridLogic.init();
+
+	    // TODO Might not need this, can just reference this in gridLogic.grid
+	    globalState.setProperty('grid', gridLogic.shuffledGrid);
+	    globalState.setProperty('goalGrid', gridLogic.goalGrid);
+	    globalState.setProperty('emptyTile', gridLogic.emptyTile);
+
+	    // TODO maybe not do init, and just fire them directly so
+	    // it's easier to read?
+
+	    // Paint the sliding puzzle using global state's shuffled grid
+	    canvas.init(selectedImage);
+
+	    // Get ready to solve
+	    solver.init(globalState.state);
+
+	    bindSolveButton();
+	    bindMove();
+	    bindResize();
+	  }
+
+	  // maybe only share global state explicitly? like this?
+	  // so components don't need to maintain global state internaly.
+
+	  function bindSolveButton() {
+	    solver.solveButton.addEventListener('click', function (event) {
+	      var solveInterval,
+	          moveCount = 0;
+
+	      solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
+
+	      // TODO: will be replaced with a wroker, so postMessage stuff
+	      solveInterval = setInterval(function () {
+
+	        if (solver.solution !== undefined) {
+
+	          if (moveCount >= solver.solution.length) {
+	            clearInterval(solveInterval);
+	            return;
+	          }
+
+	          canvas.redrawMovedTile(solver.solution[moveCount].tile, solver.solution[moveCount].direction);
+	          moveCount++;
+	        }
+	      }, 300);
+	    });
+	  }
+
+	  function bindMove() {
+	    globalState.state.appElement.addEventListener('click', function (event) {
+	      var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid);
+	      var nextMove = canvas.moveTile(event, moves);
+
+	      if (nextMove !== false) {
+	        var nextMovePosition = nextMove[0],
+	            nextMoveTile = nextMove[2];
+
+	        // TODO: Again not DRY, used in gridlogic and solver
+	        // START should be a global function passed into stuff that needs it
+	        var toPosition = globalState.state.emptyTile;
+
+	        globalState.state.emptyTile = nextMovePosition;
+	        globalState.state.grid[nextMoveTile] = toPosition;
+	        // END should be a global function passed into stuff that needs it
+
+	        // !!!TODO if solver.isSameArray(globalState.state.grid, globalState.state.goalGrid)
+	        // show outro/save
+	      }
+
+	      // console.log('NEXT', nextMove);
+	    });
+	  }
+
+	  function bindResize() {
+	    window.addEventListener('resize', function () {
+	      clearTimeout(resizeTimeout);
+
+	      resizeTimeout = setTimeout(function () {
+	        canvas.init();
+
+	        console.log('resize?');
+	      }, 400);
+	    });
+	  }
+
+	  init();
 	})();
 
 /***/ },
@@ -180,6 +452,69 @@
 /***/ function(module, exports) {
 
 	/*
+	 * @class PuzzleSelect
+	 */
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	var PuzzleSelect = (function () {
+	  function PuzzleSelect(globalState) {
+	    _classCallCheck(this, PuzzleSelect);
+
+	    this.state = globalState || {};
+	    this.puzzles = [];
+	    this.selectedPuzzle;
+	    this._images = this._getImages(this.state.canvas);
+	  }
+
+	  _createClass(PuzzleSelect, [{
+	    key: 'init',
+	    value: function init() {
+	      var i,
+	          puzzles,
+	          section = document.createElement('section'),
+	          html = '\n            <ul class="puzzle-list">\n              ' + this._images.map(function (image) {
+	        return '\n                <li class="puzzle" style="background-image:url(' + image + ')" id="' + image + '">\n                </li>';
+	      }).join('\n') + '\n            </ul>\n        ';
+
+	      section.setAttribute('class', 'select-puzzle');
+	      section.innerHTML = html;
+	      this.state.appElement.appendChild(section);
+	    }
+	  }, {
+	    key: '_getImages',
+	    value: function _getImages(canvasImages) {
+	      var i,
+	          images = [];
+
+	      // http://jsperf.com/for-vs-foreach/66
+	      // !!! TODO replace all foreaches with:
+	      for (i = 0; i < canvasImages.length; i++) {
+	        images.push(canvasImages[i].image);
+	      }
+
+	      return images;
+	    }
+	  }]);
+
+	  return PuzzleSelect;
+	})();
+
+	exports['default'] = PuzzleSelect;
+	module.exports = exports['default'];
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	/*
 	 * @class Canvas
 	 */
 	'use strict';
@@ -202,21 +537,35 @@
 	  function Canvas(globalState) {
 	    _classCallCheck(this, Canvas);
 
-	    this.globalState = globalState;
 	    this.state = globalState.state || {};
-	    this.appElement = document.getElementById('app');
+
+	    // Canvas stuff
 	    this.canvas = this._createCanvas();
 	    this.context = this.canvas.getContext('2d');
-	    this.gridSize = this.state.gridSize;
+	    this.imageObj;
+	    this.selectedImage;
 
 	    // For animation
-	    this._iteration = 0, this._totalIterations = 40;
+	    this._iteration = 0, this._totalIterations = 10;
 
-	    this._width = this.canvas.offsetWidth, this._height = this.canvas.offsetHeight;
-	    this._tileWidth = this._width / this.gridSize, this._tileHeight = this._height / this.gridSize;
+	    // For canvas grid
+	    this.gridSize = this.state.gridSize;
+
+	    // set after image is loaded
+	    this._width = 0;
+	    this._height = 0;
+	    this._tileWidth = 0;
+	    this._tileHeight = 0;
+	    this._bgOffsetY = 0;
+	    this._bgOffsetX = 0;
+	    this._directionLookup = {
+	      'UP': -1,
+	      'DOWN': +1,
+	      'LEFT': -1,
+	      'RIGHT': +1
+	    };
 	  }
 
-	  // // HOLY SHIT THIS WORKS
 	  // var canvas = document.querySelector("canvas"),
 	  //     ctx = canvas.getContext("2d"),
 	  //     w = canvas.width,
@@ -319,16 +668,204 @@
 
 	  _createClass(Canvas, [{
 	    key: 'init',
-	    value: function init() {
+	    value: function init(selectedImage) {
 	      // paint
-	      this._loadImage('test');
+	      this.selectedImage = selectedImage || this.selectedImage;
+	      this._loadImage(this.selectedImage);
+	    }
+	  }, {
+	    key: 'moveTile',
+	    value: function moveTile(event, moves) {
+	      var offsetX = event.layerX,
+	          offsetY = event.layerY;
+
+	      var tile = this._getTile(offsetX, offsetY);
+	      // maybe just get direction? (tile, direction) seems more understandable
+	      var nextMove = this._getValidMove(tile, moves);
+
+	      if (nextMove !== false) {
+	        // tile is [left, top, origTile], done this way for solver.solution
+	        this.redrawMovedTile(tile, nextMove[1]);
+	      }
+
+	      return nextMove;
+	    }
+	  }, {
+	    key: 'redrawMovedTile',
+	    value: function redrawMovedTile(selectedTile, nextMove) {
+	      var _this = this;
+
+	      var easingValue,
+	          direction = nextMove,
+	          // TODO kinda jenky
+	      easingY = 0,
+	          easingX = 0;
+
+	      if (direction === 'UP' || direction === 'DOWN') {
+	        easingValue = this._easeInOutQuad(this._iteration, 0, this._tileHeight, this._totalIterations);
+
+	        easingY = this._directionLookup[direction] * easingValue;
+	      } else {
+	        easingValue = this._easeInOutQuad(this._iteration, 0, this._tileWidth, this._totalIterations);
+
+	        easingX = this._directionLookup[direction] * easingValue;
+	      }
+
+	      this.context.closePath();
+
+	      this.context.clearRect(this._tileWidth * selectedTile[0], this._tileHeight * selectedTile[1], this._tileWidth, this._tileHeight);
+
+	      this.context.drawImage(this.imageObj, this._tileWidth * this.state.goalGrid[selectedTile[2]][0] - this._bgOffsetX, // tile bg position x
+	      this._tileHeight * this.state.goalGrid[selectedTile[2]][1] - this._bgOffsetY, // tile bg position y
+	      this._tileWidth, this._tileHeight, this._tileWidth * selectedTile[0] + easingX, // tile position X
+	      this._tileHeight * selectedTile[1] + easingY, // tile position Y
+	      this._tileWidth, this._tileHeight);
+
+	      if (this._iteration < this._totalIterations) {
+	        this._iteration++;
+	        requestAnimationFrame(function () {
+	          return _this.redrawMovedTile(selectedTile, nextMove);
+	        });
+	      } else {
+	        this._iteration = 0;
+	      }
+	    }
+
+	    // TODO, for resize I may wanna not have imageWidth/appwidth stuff in here,
+	    // have as seperate function
+	  }, {
+	    key: '_loadImage',
+	    value: function _loadImage(selectedImage) {
+	      var _this2 = this;
+
+	      this.imageObj = new Image();
+
+	      this.imageObj.onload = function () {
+
+	        var cover = _this2._width > _this2._height ? _this2._width : _this2._height,
+	            image = _this2.imageObj,
+	            imageWidth = image.width,
+	            imageHeight = image.height,
+	            appElement = _this2.state.appElement,
+	            smallX = appElement.offsetWidth < imageWidth,
+	            smallY = appElement.offsetHeight < imageHeight,
+	            offsetY = (appElement.offsetHeight - imageHeight) / 2,
+	            offsetX = (appElement.offsetWidth - imageWidth) / 2;
+
+	        if (smallX) {
+	          _this2.canvas.classList.add('small-x');
+	          // kinda jenky, adding small-x makes it position: fixed,
+	          // left: 0. Flex box no longer works, adding the offset
+	          _this2.canvas.style.top = !smallY ? offsetY + 'px' : 0;
+	        } else {
+	          _this2.canvas.classList.remove('small-x');
+	          _this2.canvas.style.top = 'auto';
+	        }
+
+	        _this2._width = smallX ? appElement.offsetWidth : imageWidth;
+	        _this2._height = smallY ? appElement.offsetHeight : imageHeight;
+	        _this2._tileWidth = _this2._width / _this2.gridSize;
+	        _this2._tileHeight = _this2._height / _this2.gridSize;
+
+	        _this2.canvas.setAttribute('height', _this2._height);
+	        _this2.canvas.setAttribute('width', _this2._width);
+	        _this2._drawTiles(offsetY, offsetX);
+	      };
+
+	      this.imageObj.src = selectedImage;
+	    }
+	  }, {
+	    key: '_drawTiles',
+	    value: function _drawTiles(offsetY, offsetX) {
+	      var i = 0,
+	          j = 0,
+	          count = 0;
+
+	      // this.context.font = "30px Helvetica";
+	      // this.context.fillStyle = "#ff00ff";
+
+	      // TODO: maybe do before passed,
+	      // but it messes up canvas centering first try
+	      this._bgOffsetX = offsetX < 0 ? offsetX : 0, this._bgOffsetY = offsetY < 0 ? offsetY : 0;
+
+	      for (j = 0; j < this.gridSize; j++) {
+	        for (i = 0; i < this.gridSize; i++) {
+	          var tile, placementX, placementY;
+
+	          if (count < this.state.grid.length) {
+	            this.context.beginPath();
+	            this.context.stroke();
+
+	            // tile[0] is upperleft tile, it contains it's x, y in grid.
+	            // Could be shuffled, ie tile[0] is [1, 1], which means the upperleft part
+	            // of the original pic is now at 1 tile to the right, 1 tile down
+	            tile = this.state.grid[count];
+	            placementX = tile[0];
+	            placementY = tile[1];
+
+	            this.context.drawImage(this.imageObj, this._tileWidth * i - this._bgOffsetX, // tile bg position x
+	            this._tileHeight * j - this._bgOffsetY, // tile bg position y
+	            this._tileWidth, this._tileHeight, this._tileWidth * placementX, // tile position x
+	            this._tileHeight * placementY, // tile position y
+	            this._tileWidth, this._tileHeight);
+	          }
+
+	          // this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
+
+	          count++;
+	        }
+	      }
+
+	      this.context.fill();
+	    }
+	  }, {
+	    key: '_getTile',
+	    value: function _getTile(offsetX, offsetY) {
+	      var left = Math.floor(offsetX / this._tileWidth),
+	          top = Math.floor(offsetY / this._tileHeight);
+
+	      var origTile = this._findArraysIndex(this.state.grid, [left, top]);
+
+	      return [left, top, origTile]; //return tile for grid logic, top and left for canvas
+	    }
+	  }, {
+	    key: '_findArraysIndex',
+	    value: function _findArraysIndex(arrays, array) {
+	      var i = 0,
+	          n = arrays.length;
+
+	      for (; i < n; i++) {
+	        if (array[0] === arrays[i][0] && array[1] === arrays[i][1]) {
+	          return i;
+	        }
+	      }
+
+	      return -1;
+	    }
+	  }, {
+	    key: '_getValidMove',
+	    value: function _getValidMove(tile, moves) {
+	      var tiledMoved = tile[2],
+	          validTile,
+	          nextMove = false;
+
+	      moves.forEach(function (move) {
+	        validTile = move[2];
+
+	        if (tiledMoved === validTile) {
+	          nextMove = move;
+	          return;
+	        }
+	      });
+
+	      return nextMove;
 	    }
 	  }, {
 	    key: '_createCanvas',
 	    value: function _createCanvas() {
 	      var canvas = document.createElement('canvas');
 	      canvas.setAttribute('class', 'scene');
-	      this.appElement.appendChild(canvas);
+	      this.state.appElement.appendChild(canvas);
 
 	      return canvas;
 	    }
@@ -340,83 +877,6 @@
 	      }
 	      return -changeInValue / 2 * (--currentIteration * (currentIteration - 2) - 1) + startValue;
 	    }
-	  }, {
-	    key: '_loadImage',
-	    value: function _loadImage(image) {
-	      var _this = this;
-
-	      var imageObj = new Image();
-
-	      imageObj.onload = function () {
-	        var cover = _this._width > _this._height ? _this._width : _this._height;
-
-	        _this.canvas.setAttribute('height', _this.canvas.offsetHeight);
-	        _this.canvas.setAttribute('width', _this.canvas.offsetWidth);
-
-	        console.log('WHAT I GOT TO WORK WITH', _this.state.grid);
-	        _this._drawTiles(imageObj);
-	      };
-
-	      imageObj.src = this.state.canvas[0].image;
-	    }
-	  }, {
-	    key: '_drawTiles',
-	    value: function _drawTiles(imageObj) {
-	      var i = 0,
-	          j = 0,
-	          count = 0;
-
-	      this.context.font = "30px Helvetica";
-	      this.context.fillStyle = "#ff00ff";
-
-	      //this.context.fillText(count, 50, 50);
-
-	      //this.context.drawImage(imageObj, this._tileWidth * placementX, this._tileHeight * placementY, this._tileWidth, this._tileHeight,  this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight);
-	      for (j = 0; j < this.gridSize; j++) {
-	        for (i = 0; i < this.gridSize; i++) {
-
-	          if (count < this.state.grid.length) {
-	            this.context.beginPath();
-	            this.context.stroke();
-
-	            var tile = this.state.grid[count],
-	                placementX = tile[0],
-	                placementY = tile[1];
-
-	            // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
-	            // mask then placement
-	            this.context.drawImage(imageObj, this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight, this._tileWidth * placementX, this._tileHeight * placementY, this._tileWidth, this._tileHeight);
-	            this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
-	            // this.context.clearRect(this._tileWidth * this.state.emptyTile[0], this._tileHeight * this.state.emptyTile[1], this._tileWidth, this._tileHeight);
-	          }
-
-	          // if (i === 1 && j === 1) {
-	          //   this.context.drawImage(imageObj, 200, 300, this._tileWidth, this._tileHeight, this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight);
-	          // } else if (i === 2 && j === 2) {
-	          //   var easingValue = this._easeInOutQuad(this._iteration, 0, this._tileHeight, this._totalIterations);
-
-	          //   // console.log('frame', easingValue, this._iteration);
-	          //   this.context.closePath();
-	          //   this.context.clearRect(this._tileWidth * i, this._tileHeight * j, 500, 500);
-
-	          //   this.context.drawImage(imageObj, this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight,  this._tileWidth * i, this._tileHeight * j - easingValue, this._tileWidth, this._tileHeight);
-	          // } else {
-	          // this.context.drawImage(imageObj, this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight,  this._tileWidth * i, this._tileHeight * j, this._tileWidth, this._tileHeight);
-	          // }
-
-	          count++;
-	        }
-	      }
-
-	      // if (this._iteration < this._totalIterations) {
-	      //   this._iteration++;
-	      //   requestAnimationFrame(() => this._drawTiles(imageObj))
-	      // } else {
-	      //   this._iteration = 0;
-	      // }
-
-	      this.context.fill();
-	    }
 	  }]);
 
 	  return Canvas;
@@ -426,7 +886,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	/*
@@ -463,6 +923,7 @@
 	    // assume emptyTile is the last tile.
 	    this.emptyTile = [this.gridSize - 1, this.gridSize - 1];
 	    this.allowableMoves;
+	    this.shuffleMoves;
 	    this.lastDirection;
 	  }
 
@@ -470,7 +931,7 @@
 	    key: 'init',
 	    value: function init() {
 	      this.goalGrid = this._createGrid(this.gridSize);
-	      this.shuffledGrid = this._shuffle(this.goalGrid, this.state.shuffleTimes);
+	      this.shuffledGrid = this._shuffle(this.goalGrid.slice(), this.state.shuffleTimes);
 	    }
 	  }, {
 	    key: '_createGrid',
@@ -545,11 +1006,14 @@
 	            direction = this.getDirection(verticleOffset, 'y');
 	          }
 
+	          allowableMoves.push([grid[tile], direction, tile]);
+
+	          // TODO: this should ONLY be used on init shuffle, need it, it helps quite a bit :(
 	          // if we just moved left, we don't want to move right
-	          if (direction !== this.getOppositeDirection()[this.lastDirection]) {
-	            // push to fringe
-	            allowableMoves.push([grid[tile], direction, tile]);
-	          }
+	          // if (direction !== this.getOppositeDirection()[this.lastDirection]) {
+	          //   // push to fringe
+	          //   allowableMoves.push([grid[tile], direction, tile]);
+	          // }
 	        }
 	      }
 
@@ -577,7 +1041,7 @@
 	      grid[tile] = this.emptyTile;
 	      this.emptyTile = fromPosition;
 
-	      console.log('EMPTY?', this.emptyTile);
+	      // console.log('EMPTY?', this.emptyTile);
 
 	      return grid;
 	    }
@@ -621,7 +1085,7 @@
 	module.exports = exports['default'];
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports) {
 
 	/*
@@ -638,7 +1102,7 @@
 	  h(n) is the distance between the tile location and goal 
 	*/
 	/*
-	 * @class Canvas
+	 * @class Solver
 	 */
 	'use strict';
 
@@ -651,7 +1115,6 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
 	var Solver = (function () {
-
 	  /*
 	   * @constructs Canvas
 	   * @param {Object} state options
@@ -663,57 +1126,241 @@
 	    this.globalState = globalState;
 	    this.state = globalState.state || {};
 	    this.gridLogic = gridLogic;
+	    this.solveButton = document.querySelector('.solve-button');
+	    this.closedGrids = [];
+	    this.emptyFringeTile; // TODO: should not be a property
+	    this.solution = [];
+	    this.steps = 0; // for testing/bailing after too long
 	  }
 
 	  _createClass(Solver, [{
 	    key: 'init',
-	    value: function init() {
-	      console.log('SOLVER INNIT', this);
-
-	      this.solve(this.state.grid, this.state.goalGrid, this.state.emptyTile);
+	    value: function init(state) {
+	      this.openGrids = [{
+	        'grid': state.grid,
+	        'rank': 0,
+	        'emptyTile': state.emptyTile,
+	        'direction': 'none', // TODO: hope this doesn't break it
+	        'tileMoved': 'none',
+	        'tileMovedPosition': 'none',
+	        'solution': []
+	      }];
 	    }
 	  }, {
 	    key: 'solve',
 	    value: function solve(grid, goalGrid, emptyTile) {
-	      console.log('TOOLS TO SOLVE', grid, goalGrid, emptyTile, 'GRID LOGIC?', this.gridLogic.getAllowableMoves(emptyTile, grid));
-	      // get fringe with
-	      // allowable moves
-	      // then gridLogic.move(emptyTile, tile);
-	      // then hueristics - generation + rectilinear + tiles out of place
-	      // TODO - how will I trigger canvas move?
-	      // compare then repeat
+	      var _this = this;
+
+	      this.steps++;
+	      // remove leftmost state and assign to candidate
+	      var candidate = this.openGrids.shift();
+
+	      if (this.steps > 3000) {
+	        console.log('sad trombone', 'OPEN', this.openGrids, 'CLOSED', this.closedGrids);
+	        return;
+	      }
+
+	      if (this._isSameArray(candidate.grid, this.state.goalGrid)) {
+	        this.solution = candidate.solution;
+	        console.log('WE DID IT IN ' + candidate.solution.length);
+	        return;
+	      }
+
+	      // TODO this should be passed explicity
+	      this.emptyFringeTile = emptyTile;
+
+	      var candidates = this.makeFringe(emptyTile, candidate, goalGrid);
+	      var isOnOpen, isOnClosed;
+
+	      candidates.forEach(function (candidate) {
+	        isOnClosed = _this.closedGrids.some(function (closedGrid) {
+	          return _this._isSameArray(candidate.grid, closedGrid.grid);
+	        });
+
+	        isOnOpen = _this.openGrids.some(function (openGrid) {
+	          return _this._isSameArray(candidate.grid, openGrid.grid);
+	        });
+
+	        // TODO, might be redundant with .every
+	        if (isOnOpen) {
+	          _this._cleanOpenGrids(candidate);
+	        }
+
+	        // throws a grid length error
+	        // if (isOnClosed) {
+	        //   this._cleanClosedGrids(candidate);
+	        // }
+
+	        // if the candidate is not on openGrids or ClosedGrids...
+	        // most importantly so we don't do moves we've already done
+	        if (!isOnOpen && !isOnClosed) {
+	          _this.openGrids.push(candidate);
+	        }
+	      });
+
+	      // sort by rank
+	      this.openGrids = this._sort(this.openGrids.slice(), 'rank');
+
+	      // move last candidate to closed
+	      this.closedGrids.push(candidate);
+
+	      // while openGrids still have stuff
+	      if (this.openGrids.length !== 0) {
+	        this.solve(this.openGrids[0].grid, goalGrid, this.openGrids[0].emptyTile);
+	      }
+	    }
+	  }, {
+	    key: 'makeFringe',
+	    value: function makeFringe(emptyTile, candidate, goalGrid) {
+	      var _this2 = this;
+
+	      var grid = candidate.grid,
+	          fringe = this.gridLogic.getAllowableMoves(emptyTile, grid),
+	          rank,
+	          solution = candidate.solution,
+	          frontier = [];
+
+	      // TODO maybe make whats returned from getAllowable a readable object
+	      // direction = fringe[1]; is kinda obtuse
+	      fringe.forEach(function (item) {
+	        var fringed = _this2._makeGrid(item, grid.slice(), _this2.emptyFringeTile),
+	            fringeGrid = fringed.grid,
+	            emptyTile = fringed.emptyTile,
+	            direction = item[1],
+	            tileMoved = item[2],
+	            tileMovedPosition = item[0];
+
+	        rank = _this2._evaluation(fringeGrid, goalGrid, solution.length);
+
+	        frontier.push({
+	          'grid': fringeGrid,
+	          'rank': rank,
+	          'emptyTile': emptyTile,
+	          'direction': direction,
+	          'tileMoved': tileMoved,
+	          'tileMovedPosition': tileMovedPosition,
+	          'solution': _this2._addPath(tileMovedPosition, tileMoved, direction, solution)
+	        });
+	      });
+
+	      return frontier;
+	    }
+	  }, {
+	    key: '_addPath',
+	    value: function _addPath(tileMovedPosition, tileMoved, direction, solution) {
+	      var tile = [tileMovedPosition[0], tileMovedPosition[1], tileMoved],
+	          path = {
+	        'tile': tile,
+	        'direction': direction
+	      };
+
+	      if (solution.length === 0) {
+
+	        return [path];
+	      } else {
+	        var solutions = solution.slice();
+	        solutions.push(path);
+
+	        return solutions;
+	      }
+	    }
+	  }, {
+	    key: '_cleanOpenGrids',
+	    value: function _cleanOpenGrids(candidate) {
+	      var _this3 = this;
+
+	      this.openGrids.forEach(function (openGrid) {
+	        if (_this3._isSameArray(candidate.grid, openGrid.grid)) {
+	          if (candidate.solution.length < openGrid.solution.length) {
+	            // set the opengrid solution to shorter path
+	            openGrid.solution = candidate.solution;
+	          }
+	        }
+	      });
+	    }
+	  }, {
+	    key: '_cleanClosedGrids',
+	    value: function _cleanClosedGrids(candidate) {
+	      var _this4 = this;
+
+	      this.closedGrids.forEach(function (closedGrids, index) {
+	        if (_this4._isSameArray(candidate.grid, closedGrids.grid)) {
+	          if (candidate.solution.length < closedGrids.solution.length) {
+	            // remove closedgrid from closed and put it on open
+	            var makeItOpen = _this4.closedGrids.splice(index, 1);
+
+	            _this4.openGrids.push(makeItOpen);
+	          }
+	        }
+	      });
+	    }
+	  }, {
+	    key: '_isSameArray',
+	    value: function _isSameArray(grid, targetGrid) {
+	      return grid.length === targetGrid.length && grid.every(function (element, index) {
+	        return element === targetGrid[index];
+	      });
+	    }
+
+	    // returns a best guess underestimate of "closeness",
+	    // of a grid to another grid "goal grid"
+	  }, {
+	    key: '_evaluation',
+	    value: function _evaluation(grid, goalGrid, generation) {
+	      return this._getDistance(grid, goalGrid) + generation;
+	    }
+	  }, {
+	    key: '_getDistance',
+	    value: function _getDistance(grid, goalGrid) {
+	      var totalDistance = 0,
+	          distance;
+
+	      grid.forEach(function (tile, index) {
+	        distance = Math.abs(tile[0] - goalGrid[index][0]) + Math.abs(tile[1] - goalGrid[index][1]);
+
+	        // quick check for another hueristic,
+	        // if the tile is identical to goalgrid tile
+	        if (distance !== 0) {
+	          totalDistance += 1;
+	        }
+
+	        totalDistance += distance;
+	      });
+
+	      return totalDistance;
+	    }
+
+	    // TODO should either be global or in gridLogic
+	  }, {
+	    key: '_makeGrid',
+	    value: function _makeGrid(fringe, grid, emptyTile) {
+	      var tile = fringe[2];
+
+	      var fromPosition = grid[tile];
+	      grid[tile] = emptyTile;
+
+	      return {
+	        'grid': grid,
+	        'emptyTile': fromPosition
+	      };
+	    }
+	  }, {
+	    key: '_sort',
+	    value: function _sort(array, key) {
+	      return array.sort(function (a, b) {
+	        return a[key] - b[key];
+	      });
 	    }
 	  }]);
 
 	  return Solver;
 	})();
 
-	var generation = 0;
-
-	function getGeneration() {
-	  return generation;
-	}
-
-	// function getDistance() {
-	//   var origCol,
-	//       origRow,
-	//       _ref;
-
-	//   _ref = originalPosition(num);
-	//   origRow = _ref[0];
-	//   origCol = _ref[1];
-
-	//   return Math.abs(origRow - curRow) + Math.abs(origCol - curCol);
-	// }
-
-	//after loop
-	generation++;
-
 	exports['default'] = Solver;
 	module.exports = exports['default'];
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	// removed by extract-text-webpack-plugin
