@@ -77,6 +77,7 @@ ul {
   max-width: 50%;
   left: 50%;
   z-index: 5;
+  display: none;
 
   &:before {
     position: fixed;
@@ -88,6 +89,10 @@ ul {
     background-color: #fff;
     opacity: .8;
     z-index: -1;
+  }
+
+  &.open {
+    display: block;
   }
 }
 
