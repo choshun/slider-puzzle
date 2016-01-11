@@ -4,11 +4,13 @@
 class Modal {
   constructor(globalState) {
     this.state = globalState || {};
-    this.puzzleConfig = this.state.puzzleConfig;
+    this.puzzleConfig = this.state.puzzleConfig,
+    this.modal;
 
     this._shuffles = [ [ 'yes', true ], [ 'no', false ] ];
   }
 
+  // TODO if modal is there then just html the contents, else create
   _render(contents, type) {
     var i,
         puzzles,
@@ -16,6 +18,7 @@ class Modal {
         html = contents;
 
     section.setAttribute('class', 'modal open ' + type);
+    this.modal = section;
     section.innerHTML = contents;
     this.state.appElement.appendChild(section);
   }
@@ -39,7 +42,7 @@ class Modal {
                   <label for="${size.toString().split(',')[1]}">
                     ${size.toString().split(',')[0]}
                   </label>
-                  <input ${this._seeIfChecked(size, 'gridSize')} name="size" type="radio" id="${size.toString().split(',')[1]}">
+                  <input ${this._seeIfChecked(size, 'gridSize')} name="gridSize" type="radio" id="${size.toString().split(',')[1]}">
                 </li>`).join('\n')}
             </ul>
 
@@ -49,12 +52,12 @@ class Modal {
                   <label for="${shuffle.toString().split(',')[1]}">
                     ${shuffle.toString().split(',')[0]}
                   </label>
-                  <input ${this._seeIfChecked(shuffle, 'shuffleTimes')} name="shuffle" type="radio" id="${shuffle.toString().split(',')[1]}">
+                  <input ${this._seeIfChecked(shuffle, 'shuffleTimes')} name="shuffleTimes" type="radio" id="${shuffle.toString().split(',')[1]}">
                 </li>`).join('\n')}
             </ul>
           </fieldset>
 
-          <button class="play" type="button">
+          <button class="play modal-close" type="button">
             Looks good to me
           </button>
         </form>
@@ -64,12 +67,9 @@ class Modal {
   }
 
   _seeIfChecked(size, initValue) {
-    console.log(size, 'checked?', size[0][1], this.state[initValue], initValue);
+    var matchesInit = (size[0][1] === this.state[initValue]);
 
-    if (size[0][1] === this.state[initValue]) {
-      
-      return 'checked=checked';
-    }
+    return (matchesInit) ? 'checked=checked' : '';
   }
 
   _getMap(object) {
