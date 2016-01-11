@@ -4,16 +4,14 @@
 class PuzzleSelect {
   constructor(globalState) {
 
-    this.state = globalState || {};
+    this.state = globalState.state || {};
     this.puzzles = [];
     this.selectedPuzzle;
     this._images = this._getImages(this.state.canvas);
   }
 
   render() {
-    var i,
-        puzzles,
-        section = document.createElement('section'),
+    var section = document.createElement('section'),
         html = `
             <ul class="puzzle-list">
               ${this._images.map(image => `

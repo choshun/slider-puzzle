@@ -1,17 +1,15 @@
-// - only import public methods, not whole objects. see es6 destructuring
+// - only import public methods, not whole objects. see es6 destructuring - not possible cause I'm using errything
 // - stuff like next move and canvas stuff might be good to be objects
 //   ie, nextMoveTile = nextMove[2] is kinda vague
-// - shuffle button?
-// - update grid after all moved are done
+// - shuffle button? - is retry button
+// - update grid after all moved are done - Cheating with retry button
 
-
-    
-    // !!! TODO replace all foreaches with:
-    // http://jsperf.com/for-vs-foreach/66
-
+  
+// !!! TODO replace all foreaches with:
+// http://jsperf.com/for-vs-foreach/66
 
   // maybe only share global state explicitly?
-  // so components don't need to maintain global state internaly.
+  // so components don't need to maintain global state internaly. -DONE
 
 // 1/6/16 TODO
 // move
@@ -64,18 +62,29 @@
 
 // 1/10/16 TODO
     modal
-      Style modal/global elements
+      Style modal/global elements - DONE
       Intro when you click a radio it drives the global state - DONE
       When you hit looks good it closes - DONE
+      show something when you hit solve "try again" - DONE
+      show something when you win "you did it in 5 moves!" -DONE
+      show something when solve borks - DONE
 
     puzzle
       retry button with presets - DONE,
       fire when user gets to goal - DONE
+      hint button - DONE
+
+  1/11/16 TODO
+    close puzzle
+    puzzle - finally do puzzle animation - DONE
+    jsdocs
+    readme
+    gjslint, csscomb... BOOM
 */
 
 require('./puzzle-core.scss');
 
-import GlobalState from './components/global-state';
+import App from './components/app';
 import PuzzleSelect from './components/puzzle-select';
 import Modal from './components/modal';
 import Canvas from './components/canvas';
@@ -263,75 +272,82 @@ import Solver from './components/solver';
     ]
   };
 
-  // TODO ok, put allowable in application, call it find fringe, sounds fancier
-  // have move in app, but define and assign it in here, core.
+  var app = new App(initialState);
+  var puzzleSelect = new PuzzleSelect(app);
+  var modal = new Modal(app);
+  var gridLogic = new GridLogic(app);
+  var canvas = new Canvas(app);
+  var solver = new Solver(app);
 
-  // remember, last move is assigned somewhere weird in gridlogic
+  var resizeTimeout,
+      steps = 0;
 
-  // TODO Not liking the dependancies
-  // maybe have allowable moves in global-state, and just call it
-  // application? Maybe also move... have move be the only custom
-  // event? (needs to change/use gridlogic.move and canvas.move from solver)
-  var globalState = new GlobalState(initialState);
-  var puzzleSelect = new PuzzleSelect(initialState);
-  var modal = new Modal(initialState);
-  var gridLogic = new GridLogic(globalState);
-  var canvas = new Canvas(globalState, gridLogic);
-  var solver = new Solver(globalState, gridLogic);
-
-  var resizeTimeout;
+  const LOCKED_CLASS = '_locked';
+  const OPEN_CLASS = '_open';
+  const HIDDEN_CLASS = '_hidden';
+  const PUZZLE_TIME = '_puzzle-time';
+  const MODAL_TIMEOUT = 200;
 
   function init() {
+    // creates puzzle image list
     puzzleSelect.render();
+    // creates puzzle configuration modal
     modal.renderIntro();
-
     // lock viewport
-    document.body.classList.add('locked');
+    document.body.classList.add(LOCKED_CLASS);
 
     bindModalCloseButton();
     bindPuzzleSelection();
     bindModalSelection();
+    // bindPuzzleCloseButton();
   }
 
   function startPuzzle(selectedImage) {
-    document.querySelector('main').classList.add('puzzle-time');
+    app.state.appElement.classList.add(PUZZLE_TIME);
     
     // set up the board
     buildPuzzle();
 
     // paint the puzzle
-    canvas.init(globalState, selectedImage);
+    canvas.init(app, selectedImage);
 
     bindSolveButton();
-    bindRetryButton();
+    bindRetryButton(document.querySelector('footer'));
+
     bindMove();
     bindResize();
   }
   
   function buildPuzzle() {
-    solver.solveButton.classList.remove('hidden');
+    solver.solveButton.classList.remove(HIDDEN_CLASS);
 
     // Make a shuffled grid
-    gridLogic.init(globalState);
+    gridLogic.init(app);
 
-    globalState.setProperty('grid', gridLogic.shuffledGrid);
-    globalState.setProperty('goalGrid', gridLogic.goalGrid);
-    globalState.setProperty('emptyTile', gridLogic.emptyTile);
+    app.setProperty('grid', gridLogic.shuffledGrid);
+    app.setProperty('goalGrid', gridLogic.goalGrid);
+    app.setProperty('emptyTile', gridLogic.emptyTile);
 
     // Get ready to solve
-    solver.init(globalState.state);
+    solver.init(app.state);
+    bindHintButton();
   }
 
   function bindPuzzleSelection() {
     var puzzleList = document.querySelector('.puzzle-list');
 
     puzzleList.addEventListener('click', function(event) {
-      document.body.classList.add('locked');
       var selectedPuzzle = event.target.getAttribute('id');
-      // TODO: add bg to selected tiles
-      // puzzleSelect.selectPuzzle(selectedPuzzle);
+
+      document.body.classList.add(LOCKED_CLASS);
       startPuzzle(selectedPuzzle);
     });
+  }
+
+  function hideButtons() {
+    solver.solveButton.classList.add(HIDDEN_CLASS);
+    solver.hintButton.classList.add(HIDDEN_CLASS);
+    gridLogic.retryButton.classList.add(HIDDEN_CLASS);
   }
 
   function bindModalSelection() {
@@ -342,26 +358,72 @@ import Solver from './components/solver';
         var puzzleParam = target.getAttribute('name'),
             value = target.getAttribute('id');
 
-        globalState.setProperty(puzzleParam, value);
+        app.setProperty(puzzleParam, value);
       }
     });
   }
 
-  function bindRetryButton() {
-    document.querySelector('.retry-button').addEventListener('click', (event) => {
+  function bindPuzzleCloseButton() {
+    document.querySelector('.close-button').addEventListener('click', (event) => {
+      app.state.appElement.removeChild(canvas.canvas);
+      app.state.appElement.classList.remove(PUZZLE_TIME);
+      document.body.classList.remove(LOCKED_CLASS);
+      hideButtons();
+    });
+  }
+
+  function bindRetryButton(parent) {
+    parent.querySelector('.retry-button').addEventListener('click', (event) => {
       // destroy canvas
-      globalState.state.appElement.removeChild(canvas.canvas);
+      app.state.appElement.removeChild(canvas.canvas);
+      solver.hintButton.classList.remove(HIDDEN_CLASS);
+      gridLogic.retryButton.classList.remove(HIDDEN_CLASS);
       buildPuzzle();
       
       // paint the puzzle
-      canvas.init(globalState);
+      canvas.init(app);
+      steps = 0;
+
+      if (event.target.classList.contains('in-modal')) {
+        modal.modal.classList.remove(OPEN_CLASS);
+      }
+    });
+  }
+
+  function bindHintButton() {
+    var origText = solver.hintButton.textContent;
+
+    solver.hintButton.addEventListener('click', (event) => {
+      var moves = app.getAllowableMoves(app.state.emptyTile, app.state.grid),
+          i,
+          ranked = [],
+          hint;
+
+      for (i = 0; i < moves.length; i++) {
+        var fringed = solver.makeFringeGrid(moves[i], app.state.grid.slice(), app.state.emptyTile.slice()),
+            rank = solver.evaluation(fringed.grid, app.state.goalGrid, 1);
+        ranked.push({
+          'rank': rank,
+          'move': i
+        });
+      }
+
+      ranked = solver.sort(ranked, 'rank');
+
+      // ranked[0] is lowest rank after sort (see solver.sort)
+      hint = moves[ranked[0].move][1];
+      solver.hintButton.innerHTML = `GO ${hint}!`;
+
+      setTimeout(() => {
+        solver.hintButton.innerHTML = origText;
+      }, 1500);
     });
   }
 
   function bindModalCloseButton() {
     document.querySelector('.modal-close').addEventListener('click', (event) => {
-      modal.modal.classList.remove('open');
-      document.body.classList.remove('locked');
+      modal.modal.classList.remove(OPEN_CLASS);
+      document.body.classList.remove(LOCKED_CLASS);
     });
   }
 
@@ -370,19 +432,29 @@ import Solver from './components/solver';
       var solveInterval,
           moveCount = 0;
       
-      // TODO: A crutch for now, when you hit solve after solving it borks
-      solver.solveButton.classList.add('hidden');
-
-      // just pass in global, with global functions and everything
-      solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
+      hideButtons();
+      solver.solve(app.state.grid, app.state.goalGrid, app.state.emptyTile);
       
+      if (solver.solution === 'fail') {
+        modal.renderError();
+        bindRetryButton(modal.modal);
+        return;
+      }
+
       // TODO: will be replaced with a wroker, so postMessage stuff
       solveInterval = setInterval(() => {
         
         if (solver.solution !== undefined) {
-
+          
           if (moveCount >= solver.solution.length) {
+            
             clearInterval(solveInterval);
+            
+            setTimeout(() => {
+              modal.renderSolved(solver.solution.length);
+              bindRetryButton(modal.modal);
+            }, MODAL_TIMEOUT);
+            
             return;
           }
 
@@ -394,25 +466,31 @@ import Solver from './components/solver';
   }
 
   function bindMove() {
-    globalState.state.appElement.addEventListener('click', (event) => {
-      var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid),
+    app.state.appElement.addEventListener('click', (event) => {
+      var moves = app.getAllowableMoves(app.state.emptyTile, app.state.grid),
           nextMove = canvas.moveTile(event, moves);
       
       if (nextMove !== false) {
         var nextMovePosition = nextMove[0],
             nextMoveTile = nextMove[2],
-            toPosition = globalState.state.emptyTile;
+            toPosition = app.state.emptyTile;
+
+        steps++;
 
         // update grid
-        globalState.state.emptyTile = nextMovePosition;
-        globalState.state.grid[nextMoveTile] = toPosition;
+        app.state.emptyTile = nextMovePosition;
+        app.state.grid[nextMoveTile] = toPosition;
 
         // if you solved it 
-        if (solver.isSameArray(globalState.state.grid, globalState.state.goalGrid)) {
-          console.log('done!');
-          // show outro/save
+        if (solver.isSameArray(app.state.grid, app.state.goalGrid)) {
+          
+          setTimeout(() => {
+            modal.renderWinning(steps);
+            hideButtons();
+            bindRetryButton(modal.modal);
+            steps = 0;
+          }, MODAL_TIMEOUT);
         }
-        
       }
     });
   }
@@ -422,8 +500,8 @@ import Solver from './components/solver';
       clearTimeout(resizeTimeout);
 
       resizeTimeout = setTimeout(() => {
-        globalState.state.appElement.removeChild(canvas.canvas);
-        canvas.init(globalState);
+        app.state.appElement.removeChild(canvas.canvas);
+        canvas.init(app);
       }, 400);
     });
   }

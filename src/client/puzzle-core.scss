@@ -5,6 +5,12 @@ html {
   font-weight: 100;
 }
 
+@media (max-width: 500px) {
+  html {
+    font-size: 12px;
+  }
+}
+
 body,
 html,
 main,
@@ -85,7 +91,7 @@ footer {
   z-index: 2;
 }
 
-.puzzle-time {
+._puzzle-time {
   align-items: center;
   display: flex;
   justify-content: center;
@@ -110,6 +116,9 @@ footer {
     left: 0;
     position: fixed;
   }
+  .close-button {
+    // display: block;
+  }
   & + footer {
     display: block;
   }
@@ -130,6 +139,16 @@ footer {
   margin: 1em;
 }
 
+.close-button {
+  border-radius: 50%;
+  display: none;
+  font-weight: 100;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 3;
+}
+
 .puzzle {
   background-attachment: fixed;
   background-size: cover;
@@ -145,7 +164,7 @@ footer {
 .modal {
   display: none;
   left: 50%;
-  margin-left: -25%;
+  margin-left: -20%;
   max-width: 50%;
   position: fixed;
   top: 15%;
@@ -161,15 +180,25 @@ footer {
     width: 100%;
     z-index: -1;
   }
-  &.open {
+  &._open {
     display: block;
   }
 }
 
-.locked {
+.modal-solved {
+  &:before {
+    opacity: .65;
+  }
+  .button {
+    float: left;
+    margin: .8em 0 0;
+  }
+}
+
+._locked {
   overflow: hidden;
 }
 
-.hidden {
+._hidden {
   display: none;
 }

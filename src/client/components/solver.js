@@ -1,17 +1,4 @@
 /*
-  Solves puzzle
-  Gives hints
-*/
-
-/*
-  f(n) = g(n) + h(n)
-  
-  where
-  f(n) is the assigned rank
-  g(n) is generation
-  h(n) is the distance between the tile location and goal 
-*/
-/*
  * @class Solver
  */
 class Solver {
@@ -19,11 +6,12 @@ class Solver {
    * @constructs Solver
    * @param {Object} state options
    */
-  constructor(globalState, gridLogic) {
-    this.globalState = globalState;
-    this.state = globalState.state || {};
+  constructor(app, gridLogic) {
+    this.app = app;
+    this.state = app.state || {};
     this.gridLogic = gridLogic;
     this.solveButton = document.querySelector('.solve-button');
+    this.hintButton = document.querySelector('.hint-button');
     this.closedGrids = [];
     this.emptyFringeTile; // TODO: should not be a property
     this.solution = [];
@@ -48,6 +36,7 @@ class Solver {
     var candidate = this.openGrids.shift();
 
     if (this.steps > 3000) {
+      this.solution = 'fail';
       console.log('sad trombone', 'OPEN', this.openGrids, 'CLOSED', this.closedGrids);
       return;
     }
@@ -74,7 +63,7 @@ class Solver {
         return this.isSameArray(candidate.grid, openGrid.grid);
       });
 
-      // TODO, might be redundant with .every
+      // TODO, might be redundant with .every, but it's still so quick
       if (isOnOpen) {
         this._cleanOpenGrids(candidate);
       }
@@ -92,7 +81,7 @@ class Solver {
     });
 
     // sort by rank
-    this.openGrids = this._sort(this.openGrids.slice(), 'rank');
+    this.openGrids = this.sort(this.openGrids.slice(), 'rank');
 
     // move last candidate to closed
     this.closedGrids.push(candidate);
@@ -105,7 +94,7 @@ class Solver {
 
   makeFringe(emptyTile, candidate, goalGrid) {
     var grid = candidate.grid,
-        fringe = this.gridLogic.getAllowableMoves(emptyTile, grid),
+        fringe = this.app.getAllowableMoves(emptyTile, grid),
         rank,
         solution = candidate.solution,
         frontier = [];
@@ -113,14 +102,14 @@ class Solver {
     // TODO maybe make whats returned from getAllowable a readable object
     // direction = fringe[1]; is kinda obtuse
     fringe.forEach((item) => {
-      var fringed = this._makeGrid(item, grid.slice(), this.emptyFringeTile),
+      var fringed = this.makeFringeGrid(item, grid.slice(), this.emptyFringeTile),
           fringeGrid = fringed.grid,
           emptyTile = fringed.emptyTile,
           direction = item[1],
           tileMoved = item[2],
           tileMovedPosition = item[0];
 
-      rank = this._evaluation(fringeGrid, goalGrid, solution.length);
+      rank = this.evaluation(fringeGrid, goalGrid, solution.length);
 
       frontier.push({
         'grid': fringeGrid,
@@ -186,7 +175,7 @@ class Solver {
 
   // returns a best guess underestimate of "closeness",
   // of a grid to another grid "goal grid"
-  _evaluation(grid, goalGrid, generation) {
+  evaluation(grid, goalGrid, generation) {
     return this._getDistance(grid, goalGrid) + generation;
   }
 
@@ -209,8 +198,7 @@ class Solver {
     return totalDistance;
   }
 
-  // TODO should either be global or in gridLogic
-  _makeGrid(fringe, grid, emptyTile) {
+  makeFringeGrid(fringe, grid, emptyTile) {
     var tile = fringe[2];
 
     var fromPosition = grid[tile];
@@ -222,7 +210,7 @@ class Solver {
     };
   }
 
-  _sort(array, key) {
+  sort(array, key) {
     return array.sort((a, b) => {
       return a[key] - b[key];
     });

@@ -9,6 +9,7 @@ class GridLogic {
    * @param {Object} options
    */
   constructor() {
+    this.app;
     this.gridSize;
     this.goalGrid;
     this.shuffledGrid;
@@ -16,15 +17,18 @@ class GridLogic {
     this.allowableMoves;
     this.shuffleMoves;
     this.lastDirection;
+    this.retryButton;
   }
 
-  init(globalState) {
-    this.gridSize = globalState.state.gridSize || {};
+  init(app) {
+    this.app = app || {};
+    this.gridSize = app.state.gridSize || {};
+    this.retryButton = document.querySelector('footer').querySelector('.retry-button');
 
     // assume emptyTile is the last tile.
     this.emptyTile = [this.gridSize - 1, this.gridSize - 1]
     this.goalGrid = this._createGrid(this.gridSize);
-    this.shuffledGrid = this._shuffle(this.goalGrid.slice(), globalState.state.shuffleTimes);
+    this.shuffledGrid = this._shuffle(this.goalGrid.slice(), app.state.shuffleTimes);
   }
 
   _createGrid(gridSize) {
@@ -50,57 +54,13 @@ class GridLogic {
 
     for (; i < n; i++) {
       // get next allowable moves
-      this.allowableMoves = this.getAllowableMoves(this.emptyTile, grid);
-
-      // console.log('ALLOWABLE', this.allowableMoves);
+      this.allowableMoves = this.app.getAllowableMoves(this.emptyTile, grid);
 
       // randomly choose an allowable move
       grid = this._moveToRandomTile(grid, this.allowableMoves);
     }
 
     return grid;
-  }
-
-  getAllowableMoves(emptyTile, grid) {
-    var tile = 0,
-        n = grid.length,
-        allowableMoves = [];
-
-    var emptyCol = emptyTile[0],
-        emptyRow = emptyTile[1],
-        gridRow,
-        gridCol,
-        oneColAway,
-        oneRowAway,
-        direction,
-        horizontalOffset,
-        verticleOffset;
-
-    for (;tile < n; tile++) {
-      gridCol = grid[tile][0];
-      gridRow = grid[tile][1];
-      horizontalOffset = gridCol - emptyCol;
-      verticleOffset = gridRow - emptyRow;
-
-      // if the tile is on same row, and one col away
-      oneColAway = (emptyRow === gridRow && Math.abs(horizontalOffset) === 1);
-      // if the tile is on col row, and one row away
-      oneRowAway = (emptyCol === gridCol && Math.abs(verticleOffset) === 1);
-
-      if (oneColAway || oneRowAway) {
-        if (oneColAway) {
-          direction = this.getDirection(horizontalOffset, 'x');
-        }
-
-        if (oneRowAway) {
-          direction = this.getDirection(verticleOffset, 'y');
-        }
-        
-        allowableMoves.push([grid[tile], direction, tile]);
-      }
-    }
-
-    return allowableMoves;
   }
 
   _moveToRandomTile(grid, allowableMoves) {
@@ -117,38 +77,7 @@ class GridLogic {
     grid[tile] = this.emptyTile;
     this.emptyTile = fromPosition;
 
-    // console.log('EMPTY?', this.emptyTile);
-
     return grid;
-  }
-
-  getDirection(offset, axis) {
-    var direction;
-
-    if (axis === 'y') {
-      if (offset === -1) {
-        direction = 'DOWN';
-      } else {
-        direction = 'UP';
-      }
-    } else if (axis === 'x') {
-      if (offset === -1) {
-        direction = 'RIGHT';
-      } else {
-        direction = 'LEFT';
-      }
-    }
-
-    return direction;
-  }
-
-  getOppositeDirection() {
-    return {
-      'LEFT': 'RIGHT',
-      'UP': 'DOWN',
-      'RIGHT': 'LEFT',
-      'DOWN': 'UP'
-    };
   }
 }
 

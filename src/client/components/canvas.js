@@ -7,8 +7,9 @@ class Canvas {
    * @constructs Canvas
    * @param {Object} state options
    */
-  constructor(globalState) {
-    this.state = globalState.state || {};
+  constructor(app) {
+    this.app = app || {};
+    this.state = app.state || {};
 
     // Canvas stuff
     this.canvas;
@@ -17,8 +18,10 @@ class Canvas {
     this.selectedImage;
 
     // For animation
-    this._iteration = 0,
-    this._totalIterations = 10;
+    this._moveIteration = 0,
+    this._totalMoveIterations = 10;
+    this._tilesIteration = 0,
+    this._totalTilesIterations = 100;
 
     // For canvas grid
     this.gridSize
@@ -38,8 +41,8 @@ class Canvas {
     };
   }
 
-  init(globalObject, selectedImage) {
-    this.gridSize = globalObject.state.gridSize;
+  init(app, selectedImage) {
+    this.gridSize = app.state.gridSize;
     this.canvas = this._createCanvas();
     this.context = this.canvas.getContext('2d');
 
@@ -70,21 +73,22 @@ class Canvas {
         easingY = 0,
         easingX = 0;
 
+    // TODO could this be DRYer?
     if (direction === 'UP' || direction === 'DOWN') {
       easingValue = this._easeInOutQuad(
-          this._iteration,
+          this._moveIteration,
           0,
           this._tileHeight,
-          this._totalIterations
+          this._totalMoveIterations
       );
 
       easingY = this._directionLookup[direction] * easingValue;
     } else {
       easingValue = this._easeInOutQuad(
-          this._iteration,
+          this._moveIteration,
           0,
           this._tileWidth,
-          this._totalIterations
+          this._totalMoveIterations
       );
 
       easingX = this._directionLookup[direction] * easingValue;
@@ -111,9 +115,22 @@ class Canvas {
       this._tileWidth,
       this._tileHeight);
 
+    // TODO makefunction, don'thave iterations, and total be a property
+    // this.drawFrame(this.redrawMovedTile, selectedTile, nextMove)
+    if (this._moveIteration < this._totalMoveIterations) {
+      this._moveIteration++;
+      requestAnimationFrame(() => this.redrawMovedTile(selectedTile, nextMove));
+    } else {
+      this._moveIteration = 0;
+    }
+  }
+
+  // Well this doesn't work
+  drawFrame(callback, ...drawParams) {
     if (this._iteration < this._totalIterations) {
       this._iteration++;
-      requestAnimationFrame(() => this.redrawMovedTile(selectedTile, nextMove));
+
+      requestAnimationFrame(() => callback(...drawParams));
     } else {
       this._iteration = 0;
     }
@@ -125,9 +142,7 @@ class Canvas {
     this.imageObj = new Image();
 
     this.imageObj.onload = () => {
-
-      var cover = this._width > this._height ? this._width : this._height,
-          image = this.imageObj,
+      var image = this.imageObj,
           imageWidth = image.width,
           imageHeight = image.height,
           appElement = this.state.appElement,
@@ -149,10 +164,7 @@ class Canvas {
       this._width = (smallX) ? appElement.offsetWidth : imageWidth;
       this._height = (smallY) ? appElement.offsetHeight : imageHeight;
       this._tileWidth = this._width / this.gridSize;
-
-      console.log('canvas gridSize', this.gridSize);
       this._tileHeight = this._height / this.gridSize;
-
       this.canvas.setAttribute('height', this._height);
       this.canvas.setAttribute('width', this._width);
       this._drawTiles(offsetY, offsetX);
@@ -166,8 +178,16 @@ class Canvas {
         j = 0,
         count = 0;
 
-    // this.context.font = "30px Helvetica";
-    // this.context.fillStyle = "#ff00ff";
+    this.context.globalAlpha = 1;
+    this.context.save();
+
+    // _easeInOutQuad(currentIteration, startValue, changeInValue, totalIterations)
+    var easingValue = this._easeInOutQuad(
+          this._tilesIteration,
+          0,
+          1,
+          this._totalTilesIterations
+      );
 
     // TODO: maybe do before passed,
     // but it messes up canvas centering first try
@@ -176,6 +196,9 @@ class Canvas {
 
     for (j = 0; j < this.gridSize; j++) {
       for (i = 0; i < this.gridSize; i++) {
+        var thisAlpha = (j === 0 && i === 0) ? (1 / 1.5 + 1 / 1.5 ) : (i / 2.5 + j / 2.5 );
+        this.context.globalAlpha = thisAlpha * easingValue;
+
         var tile,
             placementX,
             placementY;
@@ -201,14 +224,20 @@ class Canvas {
             this._tileHeight * placementY, // tile position y
             this._tileWidth, this._tileHeight);
         }
-        
-        // this.context.fillText(count, this._tileWidth * placementX + 20, this._tileHeight * placementY + 20);
 
         count++;
       }
     }
 
-    this.context.fill();
+    this.context.restore();
+
+    // TODO make function
+    if (this._tilesIteration < this._totalTilesIterations) {
+      this._tilesIteration++;
+      requestAnimationFrame(() => this._drawTiles(offsetY, offsetX));
+    } else {
+      this._tilesIteration = 0;
+    }
   }
 
   _getTile(offsetX, offsetY) {
@@ -266,106 +295,4 @@ class Canvas {
   }
 }
 
-// var canvas = document.querySelector("canvas"),
-//     ctx = canvas.getContext("2d"),
-//     w = canvas.width,
-//     h = canvas.height;
-
-// // Square-monkey object
-// function Rectangle(ctx, x, y, w, h, color, speed) {
-
-//   this.ctx = ctx;
-//   this.x = x;
-//   this.y = y;
-//   this.height = h;
-//   this.width = w;
-//   this.color = color;
-  
-//   this.alpha = 0;                        // current alpha for this instance
-//   this.speed = speed;                    // increment for alpha per frame
-//   this.triggered = false;                // is running
-//   this.done = false;                     // has finished
-// }
-
-// // prototype methods that will be shared
-// Rectangle.prototype = {
-
-//   trigger: function() {                  // start this rectangle
-//     this.triggered = true
-//   },
-  
-//   update: function() {
-//     if (this.triggered && !this.done) {  // only if active
-//       this.alpha += this.speed;          // update alpha
-//       this.done = (this.alpha >= 1);     // update status
-//     }
-
-//     this.ctx.fillStyle = this.color;     // render this instance
-//     this.ctx.globalAlpha = Math.min(1, this.alpha);
-    
-//     var t = this.ctx.globalAlpha,        // use current alpha as t
-//         cx = this.x + this.width * 0.5,  // center position
-//         cy = this.y + this.width * 0.5;
-    
-//     this.ctx.setTransform(t, 0, 0, t, cx, cy); // scale and translate
-//     this.ctx.rotate(0.5 * Math.PI * (1 - t));  // rotate, 90° <- alpha
-//     this.ctx.translate(-cx, -cy);              // translate back
-//     this.ctx.fillRect(this.x, this.y, this.width, this.height);
-//   }  
-// };
-
-// // Populate grid
-// var cols = 20,
-//     rows = 12,
-//     cellWidth = canvas.width / cols,
-//     cellHeight = canvas.height /rows,
-//     grid = [],
-//     len = cols * rows,
-//     y = 0, x;
-
-// for(; y < rows; y++) {
-//   for(x = 0; x < cols; x++) {
-//     grid.push(new Rectangle(ctx, x * cellWidth, y * cellHeight, cellWidth, cellHeight, "#79f", 0.02));
-//   }
-// }
-
-// var index,
-//     hasActive = true;
-
-// x = 0;
-
-// function loop() {
-
-//   ctx.setTransform(1,0,0,1,0,0);
-//   ctx.globalAlpha = 1;
-//   ctx.clearRect(0, 0, w, h);
-  
-//   // trigger cells
-//   for(y = 0; y < rows; y++) {
-//     var gx = (x|0) - y;
-//     if (gx >= 0 && gx < cols) {
-//       index = y * cols + gx;
-//       grid[index].trigger();
-//     }
-//   }
-  
-//   x += 0.333;
-  
-//   hasActive = false;
-  
-//   // update all
-//   for(var i = 0; i < grid.length; i++) {
-//     grid[i].update();
-//     if (!grid[i].done) hasActive = true;
-//   }
-  
-//   if (hasActive) requestAnimationFrame(loop)
-// }
-
-// loop();
-
-
-// console.log('CANVAS STATE', app.state);
-
 export default Canvas;
-
