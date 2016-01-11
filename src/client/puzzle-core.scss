@@ -1,3 +1,7 @@
+body {
+  background-color: #000
+}
+
 body,
 html,
 main,
@@ -9,7 +13,6 @@ main,
   padding: 0;
   z-index: 1;
   margin: 0;
-
 }
 
 main.puzzle-time {
@@ -34,11 +37,15 @@ main.puzzle-time {
   }
 }
 
-.solve-button {
-  z-index: 20;
+.button {
+  z-index: 10;
   position: fixed;
   top: 10%;
   left: 10%;
+}
+
+.retry-button {
+  left: 20%;
 }
 
 ul {
@@ -51,9 +58,9 @@ ul {
 }
 
 .puzzle {
-  width: 20%;
+  width: 100%;
   float: left;
-  height: 40%;
+  height: 30%;
   overflow: hidden;
   background-attachment: fixed;
   background-size: cover;
@@ -61,5 +68,30 @@ ul {
   img {
     width: 100%;
   }
+}
+
+.modal {
+  position: fixed;
+  top: 20%;
+  margin-left: -25%;
+  max-width: 50%;
+  left: 50%;
+  z-index: 5;
+
+  &:before {
+    position: fixed;
+    top: 0;
+    content: "";
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    opacity: .8;
+    z-index: -1;
+  }
+}
+
+.locked {
+  overflow: hidden;
 }
     
