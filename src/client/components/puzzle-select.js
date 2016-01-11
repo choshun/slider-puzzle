@@ -4,7 +4,7 @@
 class PuzzleSelect {
   constructor(globalState) {
 
-    this.state = globalState || {};
+    this.state = globalState.state || {};
     this.puzzles = [];
     this.selectedPuzzle;
     this._images = this._getImages(this.state.canvas);

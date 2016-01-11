@@ -19,11 +19,12 @@ class Solver {
    * @constructs Solver
    * @param {Object} state options
    */
-  constructor(globalState, gridLogic) {
-    this.globalState = globalState;
-    this.state = globalState.state || {};
+  constructor(app, gridLogic) {
+    this.app = app;
+    this.state = app.state || {};
     this.gridLogic = gridLogic;
     this.solveButton = document.querySelector('.solve-button');
+    this.hintButton = document.querySelector('.hint-button');
     this.closedGrids = [];
     this.emptyFringeTile; // TODO: should not be a property
     this.solution = [];
@@ -48,6 +49,7 @@ class Solver {
     var candidate = this.openGrids.shift();
 
     if (this.steps > 3000) {
+      this.solution = 'fail';
       console.log('sad trombone', 'OPEN', this.openGrids, 'CLOSED', this.closedGrids);
       return;
     }
@@ -74,7 +76,7 @@ class Solver {
         return this.isSameArray(candidate.grid, openGrid.grid);
       });
 
-      // TODO, might be redundant with .every
+      // TODO, might be redundant with .every, but it's still so quick
       if (isOnOpen) {
         this._cleanOpenGrids(candidate);
       }
@@ -105,7 +107,7 @@ class Solver {
 
   makeFringe(emptyTile, candidate, goalGrid) {
     var grid = candidate.grid,
-        fringe = this.gridLogic.getAllowableMoves(emptyTile, grid),
+        fringe = this.app.getAllowableMoves(emptyTile, grid),
         rank,
         solution = candidate.solution,
         frontier = [];

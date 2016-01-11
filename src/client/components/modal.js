@@ -3,8 +3,8 @@
  */
 class Modal {
   constructor(globalState) {
-    this.state = globalState || {};
-    this.puzzleConfig = this.state.puzzleConfig,
+    this.state = globalState.state || {};
+    this.puzzleConfig = this.state.puzzleConfig;
     this.modal;
 
     this._shuffles = [ [ 'yes', true ], [ 'no', false ] ];
@@ -14,13 +14,15 @@ class Modal {
   _render(contents, type) {
     var i,
         puzzles,
-        section = document.createElement('section'),
         html = contents;
 
-    section.setAttribute('class', 'modal open ' + type);
-    this.modal = section;
-    section.innerHTML = contents;
-    this.state.appElement.appendChild(section);
+    if (this.modal === undefined) {
+      this.modal = document.createElement('section');
+    }
+
+    this.modal.setAttribute('class', 'modal _open ' + type);
+    this.modal.innerHTML = contents;
+    this.state.appElement.appendChild(this.modal);
   }
 
   renderIntro() {

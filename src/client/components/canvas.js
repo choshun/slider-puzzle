@@ -7,8 +7,9 @@ class Canvas {
    * @constructs Canvas
    * @param {Object} state options
    */
-  constructor(globalState) {
-    this.state = globalState.state || {};
+  constructor(app) {
+    this.app = app || {};
+    this.state = app.state || {};
 
     // Canvas stuff
     this.canvas;
@@ -38,8 +39,8 @@ class Canvas {
     };
   }
 
-  init(globalObject, selectedImage) {
-    this.gridSize = globalObject.state.gridSize;
+  init(app, selectedImage) {
+    this.gridSize = app.state.gridSize;
     this.canvas = this._createCanvas();
     this.context = this.canvas.getContext('2d');
 
