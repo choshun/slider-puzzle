@@ -96,15 +96,15 @@ import Solver from './components/solver';
       player: 'Broseph',
       size: [
         {
-          name: '3*3',
+          name: '3 by 3',
           value: 3
         },
         {
-          name: '4*4',
+          name: '4 by 4',
           value: 4
         },
         {
-          name: '5*5',
+          name: '5 by 5',
           value: 5
         },
       ],
@@ -422,6 +422,7 @@ import Solver from './components/solver';
       clearTimeout(resizeTimeout);
 
       resizeTimeout = setTimeout(() => {
+        globalState.state.appElement.removeChild(canvas.canvas);
         canvas.init(globalState);
       }, 400);
     });

@@ -33,26 +33,26 @@ class Modal {
         <form>
           <fieldset class="configure-puzzle">
             <legend>configure your puzzle</legend>
-            <p>
+            <!--<p>
               Hi there <input type="text" placeholder="${this.puzzleConfig.player}" />
-            </p>
+            </p>-->
             <ul>
               ${sizeMaps.map(size => `
                 <li>
+                  <input ${this._seeIfChecked(size, 'gridSize')} name="gridSize" type="radio" id="${size.toString().split(',')[1]}">
                   <label for="${size.toString().split(',')[1]}">
                     ${size.toString().split(',')[0]}
                   </label>
-                  <input ${this._seeIfChecked(size, 'gridSize')} name="gridSize" type="radio" id="${size.toString().split(',')[1]}">
                 </li>`).join('\n')}
             </ul>
 
             <ul>
               ${shuffleMaps.map(shuffle => `
                 <li>
+                  <input ${this._seeIfChecked(shuffle, 'shuffleTimes')} name="shuffleTimes" type="radio" id="${shuffle.toString().split(',')[1]}">
                   <label for="${shuffle.toString().split(',')[1]}">
                     ${shuffle.toString().split(',')[0]}
                   </label>
-                  <input ${this._seeIfChecked(shuffle, 'shuffleTimes')} name="shuffleTimes" type="radio" id="${shuffle.toString().split(',')[1]}">
                 </li>`).join('\n')}
             </ul>
           </fieldset>
