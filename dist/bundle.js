@@ -50,6 +50,12 @@
 	// - shuffle button?
 	// - update grid after all moved are done
 
+	// !!! TODO replace all foreaches with:
+	// http://jsperf.com/for-vs-foreach/66
+
+	// maybe only share global state explicitly?
+	// so components don't need to maintain global state internaly.
+
 	// 1/6/16 TODO
 	// move
 	//  get canvas to move - DONE!
@@ -80,7 +86,7 @@
 	//      center canvas element in center of page -DONE
 	//      If image is too big make tiles fit to 100% viewport -DONE
 	//        center image in smaller viewport -DONE
-	//      when resize repaint canvas
+	//      when resize repaint canvas - DONE
 	//  
 	//    add image as blurred bg
 	//    when canvas paints after image selection make it 
@@ -91,14 +97,23 @@
 	//    make a modal with passed in elements,
 	//      render element in model
 	//      ie {
-	          "p": "good job",
-	          "button": {
-	            "value": 25,
-	            "text": "shuffle amount"
-	          }
+	        "p": "good job",
+	        "button": {
+	          "value": 25,
+	          "text": "shuffle amount"
 	        }
+	      }
+	      or just pass in elements... that's easier - DONE
 
-	        or just pass in elements... that's easier
+	// 1/10/16 TODO
+	    modal
+	      Style modal/global elements
+	      Intro when you click a radio it drives the global state - DONE
+	      When you hit looks good it closes - DONE
+
+	    puzzle
+	      retry button with presets - DONE,
+	      fire when user gets to goal - DONE
 	*/
 
 	'use strict';
@@ -112,6 +127,10 @@
 	var _componentsPuzzleSelect = __webpack_require__(2);
 
 	var _componentsPuzzleSelect2 = _interopRequireDefault(_componentsPuzzleSelect);
+
+	var _componentsModal = __webpack_require__(7);
+
+	var _componentsModal2 = _interopRequireDefault(_componentsModal);
 
 	var _componentsCanvas = __webpack_require__(3);
 
@@ -130,19 +149,36 @@
 	(function () {
 	  requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 
-	  // TODO:
-	  /*
-	    Thinking 
-	    3,4,5 grid size and
-	    15 30 50 for shuffling
-	   */
 	  var initialState = {
-	    gridSize: 5,
-	    shuffleTimes: 50,
+	    gridSize: 4,
+	    shuffleTimes: 30,
 	    appElement: document.getElementById('app'),
+	    puzzleConfig: {
+	      player: 'Broseph',
+	      size: [{
+	        name: '3 by 3',
+	        value: 3
+	      }, {
+	        name: '4 by 4',
+	        value: 4
+	      }, {
+	        name: '5 by 5',
+	        value: 5
+	      }],
+	      shuffle: [{
+	        name: 'A little - 15',
+	        value: 15
+	      }, {
+	        name: 'An amount - 30',
+	        value: 30
+	      }, {
+	        name: 'The limit at which my solver consistently works - 50',
+	        value: 50
+	      }]
+	    },
 	    canvas: [{
-	      'image': '/images/weed-erryday.jpg',
-	      'name': 'smaller cat'
+	      'image': '/images/sc4a.jpg',
+	      'name': 'art'
 	    }, {
 	      'image': '/images/sc4a.jpg',
 	      'name': 'art'
@@ -156,8 +192,8 @@
 	      'image': '/images/bear-shark-unicornsurfing.jpg',
 	      'name': 'surfing'
 	    }, {
-	      'image': '/images/weed-erryday.jpg',
-	      'name': 'cat!'
+	      'image': '/images/bear-shark-unicornsurfing.jpg',
+	      'name': 'surfing'
 	    }, {
 	      'image': '/images/sc4a.jpg',
 	      'name': 'art'
@@ -180,14 +216,8 @@
 	      'image': '/images/ps-battle1.jpg',
 	      'name': 'cat!'
 	    }, {
-	      'image': '/images/cat1.jpg',
+	      'image': '/images/ps-battle1.jpg',
 	      'name': 'cat!'
-	    }, {
-	      'image': '/images/cat.jpg',
-	      'name': 'cat!'
-	    }, {
-	      'image': '/images/small-cat.png',
-	      'name': 'smaller cat'
 	    }, {
 	      'image': '/images/sc4a.jpg',
 	      'name': 'art'
@@ -213,7 +243,7 @@
 	      'image': '/images/shmeh.jpg',
 	      'name': 'cat!'
 	    }, {
-	      'image': '/images/cat.jpg',
+	      'image': '/images/shmeh.jpg',
 	      'name': 'cat!'
 	    }, {
 	      'image': '/images/pretty.jpg',
@@ -259,65 +289,106 @@
 	  // event? (needs to change/use gridlogic.move and canvas.move from solver)
 	  var globalState = new _componentsGlobalState2['default'](initialState);
 	  var puzzleSelect = new _componentsPuzzleSelect2['default'](initialState);
+	  var modal = new _componentsModal2['default'](initialState);
 	  var gridLogic = new _componentsGridLogic2['default'](globalState);
 	  var canvas = new _componentsCanvas2['default'](globalState, gridLogic);
-	  var solver = new _componentsSolver2['default'](globalState, gridLogic, canvas);
+	  var solver = new _componentsSolver2['default'](globalState, gridLogic);
 
 	  var resizeTimeout;
 
 	  function init() {
-	    puzzleSelect.init();
+	    puzzleSelect.render();
+	    modal.renderIntro();
 
+	    // lock viewport
+	    document.body.classList.add('locked');
+
+	    bindModalCloseButton();
 	    bindPuzzleSelection();
-
-	    //startPuzzle();
-	  }
-
-	  function bindPuzzleSelection() {
-	    var i;
-
-	    var puzzles = document.querySelectorAll('.puzzle');
-
-	    for (i = 0; i < puzzles.length; i++) {
-	      puzzles[i].addEventListener('click', function (event) {
-	        startPuzzle(this.getAttribute('id'));
-	      });
-	    }
+	    bindModalSelection();
 	  }
 
 	  function startPuzzle(selectedImage) {
-	    // Set up the board
 	    document.querySelector('main').classList.add('puzzle-time');
 
-	    gridLogic.init();
+	    // set up the board
+	    buildPuzzle();
 
-	    // TODO Might not need this, can just reference this in gridLogic.grid
-	    globalState.setProperty('grid', gridLogic.shuffledGrid);
-	    globalState.setProperty('goalGrid', gridLogic.goalGrid);
-	    globalState.setProperty('emptyTile', gridLogic.emptyTile);
-
-	    // TODO maybe not do init, and just fire them directly so
-	    // it's easier to read?
-
-	    // Paint the sliding puzzle using global state's shuffled grid
-	    canvas.init(selectedImage);
-
-	    // Get ready to solve
-	    solver.init(globalState.state);
+	    // paint the puzzle
+	    canvas.init(globalState, selectedImage);
 
 	    bindSolveButton();
+	    bindRetryButton();
 	    bindMove();
 	    bindResize();
 	  }
 
-	  // maybe only share global state explicitly? like this?
-	  // so components don't need to maintain global state internaly.
+	  function buildPuzzle() {
+	    solver.solveButton.classList.remove('hidden');
+
+	    // Make a shuffled grid
+	    gridLogic.init(globalState);
+
+	    globalState.setProperty('grid', gridLogic.shuffledGrid);
+	    globalState.setProperty('goalGrid', gridLogic.goalGrid);
+	    globalState.setProperty('emptyTile', gridLogic.emptyTile);
+
+	    // Get ready to solve
+	    solver.init(globalState.state);
+	  }
+
+	  function bindPuzzleSelection() {
+	    var puzzleList = document.querySelector('.puzzle-list');
+
+	    puzzleList.addEventListener('click', function (event) {
+	      document.body.classList.add('locked');
+	      var selectedPuzzle = event.target.getAttribute('id');
+	      // TODO: add bg to selected tiles
+	      // puzzleSelect.selectPuzzle(selectedPuzzle);
+	      startPuzzle(selectedPuzzle);
+	    });
+	  }
+
+	  function bindModalSelection() {
+	    document.querySelector('.configure-puzzle').addEventListener('click', function (event) {
+	      var target = event.target;
+
+	      if (target.type === 'radio') {
+	        var puzzleParam = target.getAttribute('name'),
+	            value = target.getAttribute('id');
+
+	        globalState.setProperty(puzzleParam, value);
+	      }
+	    });
+	  }
+
+	  function bindRetryButton() {
+	    document.querySelector('.retry-button').addEventListener('click', function (event) {
+	      // destroy canvas
+	      globalState.state.appElement.removeChild(canvas.canvas);
+	      buildPuzzle();
+
+	      // paint the puzzle
+	      canvas.init(globalState);
+	    });
+	  }
+
+	  function bindModalCloseButton() {
+	    document.querySelector('.modal-close').addEventListener('click', function (event) {
+	      modal.modal.classList.remove('open');
+	      document.body.classList.remove('locked');
+	    });
+	  }
 
 	  function bindSolveButton() {
 	    solver.solveButton.addEventListener('click', function (event) {
 	      var solveInterval,
 	          moveCount = 0;
 
+	      // TODO: A crutch for now, when you hit solve after solving it borks
+	      solver.solveButton.classList.add('hidden');
+
+	      // just pass in global, with global functions and everything
 	      solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
 
 	      // TODO: will be replaced with a wroker, so postMessage stuff
@@ -339,26 +410,24 @@
 
 	  function bindMove() {
 	    globalState.state.appElement.addEventListener('click', function (event) {
-	      var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid);
-	      var nextMove = canvas.moveTile(event, moves);
+	      var moves = gridLogic.getAllowableMoves(globalState.state.emptyTile, globalState.state.grid),
+	          nextMove = canvas.moveTile(event, moves);
 
 	      if (nextMove !== false) {
 	        var nextMovePosition = nextMove[0],
-	            nextMoveTile = nextMove[2];
+	            nextMoveTile = nextMove[2],
+	            toPosition = globalState.state.emptyTile;
 
-	        // TODO: Again not DRY, used in gridlogic and solver
-	        // START should be a global function passed into stuff that needs it
-	        var toPosition = globalState.state.emptyTile;
-
+	        // update grid
 	        globalState.state.emptyTile = nextMovePosition;
 	        globalState.state.grid[nextMoveTile] = toPosition;
-	        // END should be a global function passed into stuff that needs it
 
-	        // !!!TODO if solver.isSameArray(globalState.state.grid, globalState.state.goalGrid)
-	        // show outro/save
+	        // if you solved it
+	        if (solver.isSameArray(globalState.state.grid, globalState.state.goalGrid)) {
+	          console.log('done!');
+	          // show outro/save
+	        }
 	      }
-
-	      // console.log('NEXT', nextMove);
 	    });
 	  }
 
@@ -367,9 +436,8 @@
 	      clearTimeout(resizeTimeout);
 
 	      resizeTimeout = setTimeout(function () {
-	        canvas.init();
-
-	        console.log('resize?');
+	        globalState.state.appElement.removeChild(canvas.canvas);
+	        canvas.init(globalState);
 	      }, 400);
 	    });
 	  }
@@ -475,8 +543,8 @@
 	  }
 
 	  _createClass(PuzzleSelect, [{
-	    key: 'init',
-	    value: function init() {
+	    key: 'render',
+	    value: function render() {
 	      var i,
 	          puzzles,
 	          section = document.createElement('section'),
@@ -494,8 +562,6 @@
 	      var i,
 	          images = [];
 
-	      // http://jsperf.com/for-vs-foreach/66
-	      // !!! TODO replace all foreaches with:
 	      for (i = 0; i < canvasImages.length; i++) {
 	        images.push(canvasImages[i].image);
 	      }
@@ -540,8 +606,8 @@
 	    this.state = globalState.state || {};
 
 	    // Canvas stuff
-	    this.canvas = this._createCanvas();
-	    this.context = this.canvas.getContext('2d');
+	    this.canvas;
+	    this.context;
 	    this.imageObj;
 	    this.selectedImage;
 
@@ -549,7 +615,7 @@
 	    this._iteration = 0, this._totalIterations = 10;
 
 	    // For canvas grid
-	    this.gridSize = this.state.gridSize;
+	    this.gridSize;
 
 	    // set after image is loaded
 	    this._width = 0;
@@ -668,7 +734,11 @@
 
 	  _createClass(Canvas, [{
 	    key: 'init',
-	    value: function init(selectedImage) {
+	    value: function init(globalObject, selectedImage) {
+	      this.gridSize = globalObject.state.gridSize;
+	      this.canvas = this._createCanvas();
+	      this.context = this.canvas.getContext('2d');
+
 	      // paint
 	      this.selectedImage = selectedImage || this.selectedImage;
 	      this._loadImage(this.selectedImage);
@@ -765,6 +835,8 @@
 	        _this2._width = smallX ? appElement.offsetWidth : imageWidth;
 	        _this2._height = smallY ? appElement.offsetHeight : imageHeight;
 	        _this2._tileWidth = _this2._width / _this2.gridSize;
+
+	        console.log('canvas gridSize', _this2.gridSize);
 	        _this2._tileHeight = _this2._height / _this2.gridSize;
 
 	        _this2.canvas.setAttribute('height', _this2._height);
@@ -910,18 +982,13 @@
 	   * @param {Object} options
 	   */
 
-	  function GridLogic(globalState) {
+	  function GridLogic() {
 	    _classCallCheck(this, GridLogic);
 
-	    this.globalState = globalState || {};
-	    this.state = globalState.state || {};
-
-	    this.gridSize = this.state.gridSize || {};
+	    this.gridSize;
 	    this.goalGrid;
 	    this.shuffledGrid;
-
-	    // assume emptyTile is the last tile.
-	    this.emptyTile = [this.gridSize - 1, this.gridSize - 1];
+	    this.emptyTile;
 	    this.allowableMoves;
 	    this.shuffleMoves;
 	    this.lastDirection;
@@ -929,9 +996,13 @@
 
 	  _createClass(GridLogic, [{
 	    key: 'init',
-	    value: function init() {
+	    value: function init(globalState) {
+	      this.gridSize = globalState.state.gridSize || {};
+
+	      // assume emptyTile is the last tile.
+	      this.emptyTile = [this.gridSize - 1, this.gridSize - 1];
 	      this.goalGrid = this._createGrid(this.gridSize);
-	      this.shuffledGrid = this._shuffle(this.goalGrid.slice(), this.state.shuffleTimes);
+	      this.shuffledGrid = this._shuffle(this.goalGrid.slice(), globalState.state.shuffleTimes);
 	    }
 	  }, {
 	    key: '_createGrid',
@@ -1007,13 +1078,6 @@
 	          }
 
 	          allowableMoves.push([grid[tile], direction, tile]);
-
-	          // TODO: this should ONLY be used on init shuffle, need it, it helps quite a bit :(
-	          // if we just moved left, we don't want to move right
-	          // if (direction !== this.getOppositeDirection()[this.lastDirection]) {
-	          //   // push to fringe
-	          //   allowableMoves.push([grid[tile], direction, tile]);
-	          // }
 	        }
 	      }
 
@@ -1026,12 +1090,6 @@
 	          direction = choice[1],
 	          tile = choice[2],
 	          fromPosition = grid[tile];
-
-	      // console.log('CHOICE?', choice);
-
-	      // console.log('TILE?', tile);
-
-	      // console.log('DIRECTION?', direction);
 
 	      // keep track so we don't move back and cancel
 	      // last move
@@ -1116,7 +1174,7 @@
 
 	var Solver = (function () {
 	  /*
-	   * @constructs Canvas
+	   * @constructs Solver
 	   * @param {Object} state options
 	   */
 
@@ -1160,7 +1218,7 @@
 	        return;
 	      }
 
-	      if (this._isSameArray(candidate.grid, this.state.goalGrid)) {
+	      if (this.isSameArray(candidate.grid, this.state.goalGrid)) {
 	        this.solution = candidate.solution;
 	        console.log('WE DID IT IN ' + candidate.solution.length);
 	        return;
@@ -1174,11 +1232,11 @@
 
 	      candidates.forEach(function (candidate) {
 	        isOnClosed = _this.closedGrids.some(function (closedGrid) {
-	          return _this._isSameArray(candidate.grid, closedGrid.grid);
+	          return _this.isSameArray(candidate.grid, closedGrid.grid);
 	        });
 
 	        isOnOpen = _this.openGrids.some(function (openGrid) {
-	          return _this._isSameArray(candidate.grid, openGrid.grid);
+	          return _this.isSameArray(candidate.grid, openGrid.grid);
 	        });
 
 	        // TODO, might be redundant with .every
@@ -1270,7 +1328,7 @@
 	      var _this3 = this;
 
 	      this.openGrids.forEach(function (openGrid) {
-	        if (_this3._isSameArray(candidate.grid, openGrid.grid)) {
+	        if (_this3.isSameArray(candidate.grid, openGrid.grid)) {
 	          if (candidate.solution.length < openGrid.solution.length) {
 	            // set the opengrid solution to shorter path
 	            openGrid.solution = candidate.solution;
@@ -1284,7 +1342,7 @@
 	      var _this4 = this;
 
 	      this.closedGrids.forEach(function (closedGrids, index) {
-	        if (_this4._isSameArray(candidate.grid, closedGrids.grid)) {
+	        if (_this4.isSameArray(candidate.grid, closedGrids.grid)) {
 	          if (candidate.solution.length < closedGrids.solution.length) {
 	            // remove closedgrid from closed and put it on open
 	            var makeItOpen = _this4.closedGrids.splice(index, 1);
@@ -1295,8 +1353,8 @@
 	      });
 	    }
 	  }, {
-	    key: '_isSameArray',
-	    value: function _isSameArray(grid, targetGrid) {
+	    key: 'isSameArray',
+	    value: function isSameArray(grid, targetGrid) {
 	      return grid.length === targetGrid.length && grid.every(function (element, index) {
 	        return element === targetGrid[index];
 	      });
@@ -1364,6 +1422,99 @@
 /***/ function(module, exports) {
 
 	// removed by extract-text-webpack-plugin
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	/*
+	 * @class PuzzleSelect
+	 */
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	  value: true
+	});
+
+	var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
+
+	var Modal = (function () {
+	  function Modal(globalState) {
+	    _classCallCheck(this, Modal);
+
+	    this.state = globalState || {};
+	    this.puzzleConfig = this.state.puzzleConfig, this.modal;
+
+	    this._shuffles = [['yes', true], ['no', false]];
+	  }
+
+	  // TODO if modal is there then just html the contents, else create
+
+	  _createClass(Modal, [{
+	    key: '_render',
+	    value: function _render(contents, type) {
+	      var i,
+	          puzzles,
+	          section = document.createElement('section'),
+	          html = contents;
+
+	      section.setAttribute('class', 'modal open ' + type);
+	      this.modal = section;
+	      section.innerHTML = contents;
+	      this.state.appElement.appendChild(section);
+	    }
+	  }, {
+	    key: 'renderIntro',
+	    value: function renderIntro() {
+	      var _this = this;
+
+	      var sizeMaps = this._getMap(this.puzzleConfig.size),
+	          shuffleMaps = this._getMap(this.puzzleConfig.shuffle);
+
+	      var html = '\n        <h1>Slider Puzzle!</h1>\n\n        <form>\n          <fieldset class="configure-puzzle">\n            <legend>configure your puzzle</legend>\n            <!--<p>\n              Hi there <input type="text" placeholder="' + this.puzzleConfig.player + '" />\n            </p>-->\n            <ul>\n              ' + sizeMaps.map(function (size) {
+	        return '\n                <li>\n                  <input ' + _this._seeIfChecked(size, 'gridSize') + ' name="gridSize" type="radio" id="' + size.toString().split(',')[1] + '">\n                  <label for="' + size.toString().split(',')[1] + '">\n                    ' + size.toString().split(',')[0] + '\n                  </label>\n                </li>';
+	      }).join('\n') + '\n            </ul>\n\n            <ul>\n              ' + shuffleMaps.map(function (shuffle) {
+	        return '\n                <li>\n                  <input ' + _this._seeIfChecked(shuffle, 'shuffleTimes') + ' name="shuffleTimes" type="radio" id="' + shuffle.toString().split(',')[1] + '">\n                  <label for="' + shuffle.toString().split(',')[1] + '">\n                    ' + shuffle.toString().split(',')[0] + '\n                  </label>\n                </li>';
+	      }).join('\n') + '\n            </ul>\n          </fieldset>\n\n          <button class="play modal-close" type="button">\n            Looks good to me\n          </button>\n        </form>\n    ';
+
+	      this._render(html, 'intro');
+	    }
+	  }, {
+	    key: '_seeIfChecked',
+	    value: function _seeIfChecked(size, initValue) {
+	      var matchesInit = size[0][1] === this.state[initValue];
+
+	      return matchesInit ? 'checked=checked' : '';
+	    }
+	  }, {
+	    key: '_getMap',
+	    value: function _getMap(object) {
+	      var i,
+	          key,
+	          map = [];
+
+	      for (i = 0; i < object.length; i++) {
+	        var item = object[i],
+	            group = [];
+
+	        for (key in item) {
+	          group.push(item[key]);
+	        }
+
+	        map.push([group]);
+	      }
+
+	      return map;
+	    }
+	  }]);
+
+	  return Modal;
+	})();
+
+	exports['default'] = Modal;
+	module.exports = exports['default'];
 
 /***/ }
 /******/ ]);

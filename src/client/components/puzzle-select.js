@@ -10,7 +10,7 @@ class PuzzleSelect {
     this._images = this._getImages(this.state.canvas);
   }
 
-  init() {
+  render() {
     var i,
         puzzles,
         section = document.createElement('section'),
@@ -31,8 +31,6 @@ class PuzzleSelect {
     var i,
         images = [];
 
-    // http://jsperf.com/for-vs-foreach/66
-    // !!! TODO replace all foreaches with:
     for (i = 0; i < canvasImages.length; i++) {
       images.push(canvasImages[i].image);
     }
