@@ -18,7 +18,6 @@ class Modal {
     section.setAttribute('class', 'modal open ' + type);
     section.innerHTML = contents;
     this.state.appElement.appendChild(section);
-    console.log('anything?');  
   }
 
   renderIntro() {

@@ -24,10 +24,8 @@ class GridLogic {
   }
 
   init() {
-    console.log('retry in grid logic');
     this.emptyTile = [this.gridSize - 1, this.gridSize - 1]
     this.goalGrid = this._createGrid(this.gridSize);
-
     this.shuffledGrid = this._shuffle(this.goalGrid.slice(), this.state.shuffleTimes);
   }
 
@@ -101,14 +99,6 @@ class GridLogic {
         }
         
         allowableMoves.push([grid[tile], direction, tile]);
-
-
-        // TODO: this should ONLY be used on init shuffle, need it, it helps quite a bit :(
-        // if we just moved left, we don't want to move right
-        // if (direction !== this.getOppositeDirection()[this.lastDirection]) {
-        //   // push to fringe
-        //   allowableMoves.push([grid[tile], direction, tile]);
-        // }
       }
     }
 
