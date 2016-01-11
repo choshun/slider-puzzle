@@ -65,14 +65,21 @@
       Style modal/global elements - DONE
       Intro when you click a radio it drives the global state - DONE
       When you hit looks good it closes - DONE
-      show something when you hit solve "try again"
-      show something when you win "you did it in 5 moves!"
-      show something when solve borks
+      show something when you hit solve "try again" - DONE
+      show something when you win "you did it in 5 moves!" -DONE
+      show something when solve borks - DONE
 
     puzzle
       retry button with presets - DONE,
       fire when user gets to goal - DONE
       hint button - DONE
+
+  1/11/16 TODO
+    close puzzle
+    puzzle - finally do puzzle animation
+    jsdocs
+    readme
+    gjslint, csscomb... BOOM
 */
 
 require('./puzzle-core.scss');
@@ -278,6 +285,7 @@ import Solver from './components/solver';
   const LOCKED_CLASS = '_locked';
   const OPEN_CLASS = '_open';
   const HIDDEN_CLASS = '_hidden';
+  const PUZZLE_TIME = '_puzzle-time';
   const MODAL_TIMEOUT = 200;
 
   function init() {
@@ -291,10 +299,11 @@ import Solver from './components/solver';
     bindModalCloseButton();
     bindPuzzleSelection();
     bindModalSelection();
+    // bindPuzzleCloseButton();
   }
 
   function startPuzzle(selectedImage) {
-    document.querySelector('main').classList.add('puzzle-time');
+    app.state.appElement.classList.add(PUZZLE_TIME);
     
     // set up the board
     buildPuzzle();
@@ -351,6 +360,15 @@ import Solver from './components/solver';
 
         app.setProperty(puzzleParam, value);
       }
+    });
+  }
+
+  function bindPuzzleCloseButton() {
+    document.querySelector('.close-button').addEventListener('click', (event) => {
+      app.state.appElement.removeChild(canvas.canvas);
+      app.state.appElement.classList.remove(PUZZLE_TIME);
+      document.body.classList.remove(LOCKED_CLASS);
+      hideButtons();
     });
   }
 
