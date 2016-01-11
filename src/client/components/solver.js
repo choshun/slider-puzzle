@@ -92,7 +92,7 @@ class Solver {
     });
 
     // sort by rank
-    this.openGrids = this._sort(this.openGrids.slice(), 'rank');
+    this.openGrids = this.sort(this.openGrids.slice(), 'rank');
 
     // move last candidate to closed
     this.closedGrids.push(candidate);
@@ -113,14 +113,14 @@ class Solver {
     // TODO maybe make whats returned from getAllowable a readable object
     // direction = fringe[1]; is kinda obtuse
     fringe.forEach((item) => {
-      var fringed = this._makeGrid(item, grid.slice(), this.emptyFringeTile),
+      var fringed = this.makeFringeGrid(item, grid.slice(), this.emptyFringeTile),
           fringeGrid = fringed.grid,
           emptyTile = fringed.emptyTile,
           direction = item[1],
           tileMoved = item[2],
           tileMovedPosition = item[0];
 
-      rank = this._evaluation(fringeGrid, goalGrid, solution.length);
+      rank = this.evaluation(fringeGrid, goalGrid, solution.length);
 
       frontier.push({
         'grid': fringeGrid,
@@ -186,7 +186,7 @@ class Solver {
 
   // returns a best guess underestimate of "closeness",
   // of a grid to another grid "goal grid"
-  _evaluation(grid, goalGrid, generation) {
+  evaluation(grid, goalGrid, generation) {
     return this._getDistance(grid, goalGrid) + generation;
   }
 
@@ -209,8 +209,7 @@ class Solver {
     return totalDistance;
   }
 
-  // TODO should either be global or in gridLogic
-  _makeGrid(fringe, grid, emptyTile) {
+  makeFringeGrid(fringe, grid, emptyTile) {
     var tile = fringe[2];
 
     var fromPosition = grid[tile];
@@ -222,7 +221,7 @@ class Solver {
     };
   }
 
-  _sort(array, key) {
+  sort(array, key) {
     return array.sort((a, b) => {
       return a[key] - b[key];
     });
