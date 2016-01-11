@@ -309,6 +309,8 @@ import Solver from './components/solver';
   }
   
   function buildPuzzle() {
+    solver.solveButton.classList.remove('hidden');
+
     // Make a shuffled grid
     gridLogic.init(globalState);
 
@@ -325,7 +327,10 @@ import Solver from './components/solver';
 
     puzzleList.addEventListener('click', function(event) {
       document.body.classList.add('locked');
-      startPuzzle(event.target.getAttribute('id'));
+      var selectedPuzzle = event.target.getAttribute('id');
+      // TODO: add bg to selected tiles
+      // puzzleSelect.selectPuzzle(selectedPuzzle);
+      startPuzzle(selectedPuzzle);
     });
   }
 
@@ -365,6 +370,9 @@ import Solver from './components/solver';
       var solveInterval,
           moveCount = 0;
       
+      // TODO: A crutch for now, when you hit solve after solving it borks
+      solver.solveButton.classList.add('hidden');
+
       // just pass in global, with global functions and everything
       solver.solve(globalState.state.grid, globalState.state.goalGrid, globalState.state.emptyTile);
       
