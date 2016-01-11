@@ -52,7 +52,7 @@ class Solver {
       return;
     }
 
-    if (this._isSameArray(candidate.grid, this.state.goalGrid)) {
+    if (this.isSameArray(candidate.grid, this.state.goalGrid)) {
       this.solution = candidate.solution;
       console.log('WE DID IT IN ' + candidate.solution.length);
       return;
@@ -67,11 +67,11 @@ class Solver {
 
     candidates.forEach((candidate) => {
       isOnClosed = this.closedGrids.some((closedGrid) => {
-        return this._isSameArray(candidate.grid, closedGrid.grid);
+        return this.isSameArray(candidate.grid, closedGrid.grid);
       });
 
       isOnOpen = this.openGrids.some((openGrid) => {
-        return this._isSameArray(candidate.grid, openGrid.grid);
+        return this.isSameArray(candidate.grid, openGrid.grid);
       });
 
       // TODO, might be redundant with .every
@@ -156,7 +156,7 @@ class Solver {
 
   _cleanOpenGrids(candidate) {
     this.openGrids.forEach((openGrid) => {
-      if (this._isSameArray(candidate.grid, openGrid.grid)) {
+      if (this.isSameArray(candidate.grid, openGrid.grid)) {
         if (candidate.solution.length < openGrid.solution.length) {
           // set the opengrid solution to shorter path
           openGrid.solution = candidate.solution;
@@ -167,7 +167,7 @@ class Solver {
 
   _cleanClosedGrids(candidate) {
     this.closedGrids.forEach((closedGrids, index) => {
-      if (this._isSameArray(candidate.grid, closedGrids.grid)) {
+      if (this.isSameArray(candidate.grid, closedGrids.grid)) {
         if (candidate.solution.length < closedGrids.solution.length) {
           // remove closedgrid from closed and put it on open
           var makeItOpen = this.closedGrids.splice(index, 1);
@@ -178,7 +178,7 @@ class Solver {
     });
   }
 
-  _isSameArray(grid, targetGrid) {
+  isSameArray(grid, targetGrid) {
     return (grid.length === targetGrid.length) && grid.every((element, index) => {
       return element === targetGrid[index]; 
     });
