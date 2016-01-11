@@ -12,10 +12,6 @@ class Modal {
 
   // TODO if modal is there then just html the contents, else create
   _render(contents, type) {
-    var i,
-        puzzles,
-        html = contents;
-
     if (this.modal === undefined) {
       this.modal = document.createElement('section');
     }
@@ -23,6 +19,32 @@ class Modal {
     this.modal.setAttribute('class', 'modal _open ' + type);
     this.modal.innerHTML = contents;
     this.state.appElement.appendChild(this.modal);
+  }
+
+  renderSolved(solutionLength) {
+    var html = `
+      <h1>You were so close!</h1>
+
+      <p>It took us ${solutionLength} moves to solve</p>
+
+      <p>Try again?!?!?</p>
+
+      <button id="retry" class="button retry-button in-modal">RETRY</button>
+    `;
+
+    this._render(html, 'modal-solved');
+  }
+
+  renderError(solutionLength) {
+    var html = `
+      <h1>I have failed you sempai</h1>
+
+      <p>Try again?!?!?</p>
+
+      <button id="retry" class="button retry-button in-modal">RETRY</button>
+    `;
+
+    this._render(html, 'modal-solved');
   }
 
   renderIntro() {
