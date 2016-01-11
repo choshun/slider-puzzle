@@ -90,7 +90,7 @@ import Solver from './components/solver';
 
   var initialState = {
     gridSize: 4,
-    shuffleTimes: 50,
+    shuffleTimes: 30,
     appElement: document.getElementById('app'),
     puzzleConfig: {
       player: 'Broseph',
@@ -277,23 +277,20 @@ import Solver from './components/solver';
   var modal = new Modal(initialState);
   var gridLogic = new GridLogic(globalState);
   var canvas = new Canvas(globalState, gridLogic);
-  var solver = new Solver(globalState, gridLogic, canvas);
+  var solver = new Solver(globalState, gridLogic);
 
   var resizeTimeout;
 
   function init() {
     puzzleSelect.render();
-    // modal.renderIntro();
+    modal.renderIntro();
 
     // lock viewport
-    // document.body.classList.add('locked');
+    document.body.classList.add('locked');
 
+    bindModalCloseButton();
     bindPuzzleSelection();
     bindModalSelection();
-
-    //startPuzzle();
-
-
   }
 
   function bindPuzzleSelection() {
@@ -306,13 +303,21 @@ import Solver from './components/solver';
   }
 
   function bindModalSelection() {
+    document.querySelector('.configure-puzzle').addEventListener('click', (event) => {
+      var target = event.target;
 
+      if (target.type === 'radio') {
+        var puzzleParam = target.getAttribute('name'),
+            value = target.getAttribute('id');
+
+        globalState.setProperty(puzzleParam, value);
+      }
+    });
   }
 
   function buildPuzzle() {
-
     // Make a shuffled grid
-    gridLogic.init();
+    gridLogic.init(globalState);
 
     globalState.setProperty('grid', gridLogic.shuffledGrid);
     globalState.setProperty('goalGrid', gridLogic.goalGrid);
@@ -329,7 +334,7 @@ import Solver from './components/solver';
     buildPuzzle();
 
     // paint the puzzle
-    canvas.init(selectedImage);
+    canvas.init(globalState, selectedImage);
 
     bindSolveButton();
     bindRetryButton();
@@ -344,7 +349,14 @@ import Solver from './components/solver';
       buildPuzzle();
       
       // paint the puzzle
-      canvas.init();
+      canvas.init(globalState);
+    });
+  }
+
+  function bindModalCloseButton() {
+    document.querySelector('.modal-close').addEventListener('click', (event) => {
+      console.log('boop');
+      modal.modal.classList.remove('open');
     });
   }
 
@@ -406,7 +418,7 @@ import Solver from './components/solver';
       clearTimeout(resizeTimeout);
 
       resizeTimeout = setTimeout(() => {
-        canvas.init();
+        canvas.init(globalState);
       }, 400);
     });
   }
