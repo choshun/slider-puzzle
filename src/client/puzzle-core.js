@@ -1,86 +1,12 @@
-// - only import public methods, not whole objects. see es6 destructuring - not possible cause I'm using errything
-// - stuff like next move and canvas stuff might be good to be objects
-//   ie, nextMoveTile = nextMove[2] is kinda vague
-// - shuffle button? - is retry button
-// - update grid after all moved are done - Cheating with retry button
-
-  
-// !!! TODO replace all foreaches with:
-// http://jsperf.com/for-vs-foreach/66
-
-  // maybe only share global state explicitly?
-  // so components don't need to maintain global state internaly. -DONE
-
-// 1/6/16 TODO
-// move
-//  get canvas to move - DONE!
-//    translate e.pagex/y to tiles - DONE!
-//    fire move on allowable tiles - DONE!
-//    move to correct tile - DONE!
-//  get grid to update, making it way easier to debug -DONE!
-//  * make cursor:pointer on things that can move
 /**
-// 1/7/16 TODO
-// solve
-//  when you hit solve button, and it's solved, have grid update to solved state - DONE
-//  make each grid have it's history for open/closed grid path comparisons
-//  rewrite solve algorithm to EXACTLY what the innernet said it should be
-//    not on open or closed - DONE
-//    on closed - :(
-//    on open - DONE
-//  test for same rank trees, this is where it hangs all the time - kinda done? should be addressed by prev todo
-//  make sure solve doesn't fire until final tree is made
-//    right now I add to solver.solved as it loops, this may balloon when
-//    trees expand - DONE(ish)
-//  put in worker
-
-//  1/9/16 TODO
-//  canvas prettifying
-//    make responsive
-//      center any uploaded image in canvas based on image size - DONE
-//      center canvas element in center of page -DONE
-//      If image is too big make tiles fit to 100% viewport -DONE
-//        center image in smaller viewport -DONE
-//      when resize repaint canvas - DONE
-//  
-//    add image as blurred bg
-//    when canvas paints after image selection make it 
-//      have a cool animation 
-//      (different global-alphas and maybe position)
-//
-//  intro/outro
-//    make a modal with passed in elements,
-//      render element in model
-//      ie {
-        "p": "good job",
-        "button": {
-          "value": 25,
-          "text": "shuffle amount"
-        }
-      }
-      or just pass in elements... that's easier - DONE
-
-// 1/10/16 TODO
-    modal
-      Style modal/global elements - DONE
-      Intro when you click a radio it drives the global state - DONE
-      When you hit looks good it closes - DONE
-      show something when you hit solve "try again" - DONE
-      show something when you win "you did it in 5 moves!" -DONE
-      show something when solve borks - DONE
-
-    puzzle
-      retry button with presets - DONE,
-      fire when user gets to goal - DONE
-      hint button - DONE
-
-  1/11/16 TODO
-    close puzzle
-    puzzle - finally do puzzle animation - DONE
-    jsdocs
-    readme
-    gjslint, csscomb... BOOM
-*/
+ * Puzzle Core
+ *
+ * Bootstraps the puzzle.
+ * All DOM bindings and app.state properties
+ * should be set here.
+ *
+ * @author choshun.snyder@gmail.com (Choshun Snyder)
+ */
 
 require('./puzzle-core.scss');
 
@@ -92,11 +18,6 @@ import GridLogic from './components/grid-logic';
 import Solver from './components/solver';
 
 (() => {
-  requestAnimationFrame = window.requestAnimationFrame ||
-                          window.mozRequestAnimationFrame ||
-                          window.webkitRequestAnimationFrame ||
-                          window.msRequestAnimationFrame;
-
   var initialState = {
     gridSize: 4,
     shuffleTimes: 30,
@@ -304,7 +225,7 @@ import Solver from './components/solver';
 
   function startPuzzle(selectedImage) {
     app.state.appElement.classList.add(PUZZLE_TIME);
-    
+
     // set up the board
     buildPuzzle();
 
@@ -317,7 +238,7 @@ import Solver from './components/solver';
     bindMove();
     bindResize();
   }
-  
+
   function buildPuzzle() {
     solver.solveButton.classList.remove(HIDDEN_CLASS);
 
@@ -351,16 +272,17 @@ import Solver from './components/solver';
   }
 
   function bindModalSelection() {
-    document.querySelector('.configure-puzzle').addEventListener('click', (event) => {
-      var target = event.target;
+    document.querySelector('.configure-puzzle')
+        .addEventListener('click', (event) => {
+          var target = event.target;
 
-      if (target.type === 'radio') {
-        var puzzleParam = target.getAttribute('name'),
-            value = target.getAttribute('id');
+          if (target.type === 'radio') {
+            var puzzleParam = target.getAttribute('name'),
+                value = target.getAttribute('id');
 
-        app.setProperty(puzzleParam, value);
-      }
-    });
+            app.setProperty(puzzleParam, value);
+          }
+        });
   }
 
   function bindPuzzleCloseButton() {
@@ -441,15 +363,11 @@ import Solver from './components/solver';
         return;
       }
 
-      // TODO: will be replaced with a wroker, so postMessage stuff
       solveInterval = setInterval(() => {
-        
         if (solver.solution !== undefined) {
-          
           if (moveCount >= solver.solution.length) {
             
             clearInterval(solveInterval);
-            
             setTimeout(() => {
               modal.renderSolved(solver.solution.length);
               bindRetryButton(modal.modal);

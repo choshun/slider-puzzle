@@ -96,12 +96,9 @@ footer {
   display: flex;
   justify-content: center;
   &:before {
-    // background-image: url('/images/sc4a.jpg');
     background-color: #fff;
     background-size: cover;
     content: '';
-    content: '';
-    // -webkit-filter: blur(10px);
     height: 100%;
     left: 0;
     opacity: .9;
