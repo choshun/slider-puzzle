@@ -1,6 +1,9 @@
-/*
+/**
  * @class GridLogic
- * Responsible for setting up the grid, and maintaining it
+ *
+ * Handles setting up and shuffling initial grid object
+ *
+ * @author choshun.snyder@gmail.com (Choshun Snyder)
  */
 class GridLogic {
 
@@ -20,17 +23,27 @@ class GridLogic {
     this.retryButton;
   }
 
+  /**
+   * Bootstraps canvas.
+   * @param {Object} app global app.
+   */
   init(app) {
     this.app = app || {};
     this.gridSize = app.state.gridSize || {};
-    this.retryButton = document.querySelector('footer').querySelector('.retry-button');
+    this.retryButton = document.querySelector('footer')
+        .querySelector('.retry-button');
 
     // assume emptyTile is the last tile.
-    this.emptyTile = [this.gridSize - 1, this.gridSize - 1]
+    this.emptyTile = [this.gridSize - 1, this.gridSize - 1];
     this.goalGrid = this._createGrid(this.gridSize);
-    this.shuffledGrid = this._shuffle(this.goalGrid.slice(), app.state.shuffleTimes);
+    this.shuffledGrid = this._shuffle(this.goalGrid.slice(),
+        app.state.shuffleTimes);
   }
 
+  /**
+   * Creates a grid with an empty tile.
+   * @param {String} gridSize size of puzzle.
+   */
   _createGrid(gridSize) {
     var i,
         j,
@@ -48,6 +61,13 @@ class GridLogic {
     return grid;
   }
 
+  /**
+   * Shuffles a grid.
+   * @param {Array} grid grid
+   * @param {Number} times times to shuffle (random)
+   *
+   * @return {Array} grid grid
+   */
   _shuffle(grid, times) {
     var i = 0,
         n = times;
@@ -63,9 +83,19 @@ class GridLogic {
     return grid;
   }
 
+  /**
+   * When sfhuffling it'll move grid tiles
+   * to a random allowable grid.
+   * @param {Array} grid grid
+   * @param {Array} allowableMoves allowable moves
+   *  (see app.getAllowable moves)
+   *
+   * @return {Array} grid grid
+   */
   _moveToRandomTile(grid, allowableMoves) {
-    var choice = allowableMoves[Math.floor(Math.random() * allowableMoves.length)],
-        direction = choice[1], 
+    var choice = allowableMoves[Math.floor(Math.random() *
+            allowableMoves.length)],
+        direction = choice[1],
         tile = choice[2],
         fromPosition = grid[tile];
 
@@ -79,6 +109,6 @@ class GridLogic {
 
     return grid;
   }
-}
+};
 
 export default GridLogic;
