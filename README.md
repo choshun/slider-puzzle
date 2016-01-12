@@ -1,6 +1,6 @@
 Configurable canvas puzzle that solves itself ╰(✿˙ᗜ˙)੭━☆ﾟ.* ･｡ﾟ
 
-I obviously had the most trouble with the solving algorithm. The sources that I based this off of were:
+I had the most trouble with the solving algorithm. The sources that I based this off of were:
 
 * [youtube video](https://www.youtube.com/watch?v=b19e0_NlD-U&t=438) That psuedocode helped a lot.
 * [wikipedia](https://en.wikipedia.org/wiki/A*_search_algorithm) As a sanity check
@@ -75,8 +75,7 @@ I obviously had the most trouble with the solving algorithm. The sources that I 
   * have all requestAnimation callbacks use same easing iteration function - :(
   * puzzle - finally do puzzle animation - DONE
   * readme - DONE
-  * jsdocs
-  * gjslint, csscomb... BOOM
+  * jsdocs - DONE
 
 ###More features I want to do
 * make solver.solve a worker, could help with call stack limits
