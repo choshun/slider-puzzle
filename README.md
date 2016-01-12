@@ -20,8 +20,7 @@ I obviously had the most trouble with the solving algorithm. The sources that I 
   * index.html - the page, has little; everything is driven by and rendered by a configuration object called app.state.
   * puzzle-core.scss - the css for the app.
   * puzzle-core.js - bootstrapper and point of truth for all logic in the app.
-* /src/client/components
-  I tried to make these only dependant on the app component, they don't call eachother and are only used in puzzle-core.
+* /src/client/components - I tried to make these only dependant on the app component, they don't call eachother and are only used in puzzle-core.
   * app.js - getter and setter of app.state, and global functions like app.getAllowableState (get fringe).
   * canvas.js - creates a responsive ui for the puzzle. Tried to make it work for any viewport and any uploaded image.
   * grid-logic.js - creates and shuffles the grid based on app.state.
@@ -31,12 +30,11 @@ I obviously had the most trouble with the solving algorithm. The sources that I 
 
 ###Hotsheet
 
-* Before (wasn't really keeping track of day)
+* Before 1/6/16
   * get es6 webpack seed up on local - DONE
-  * create a shuffled grid
-  * get allowable moves based on empty tile and grid
+  * create a shuffled grid - DONE
+  * get allowable moves based on empty tile and grid - DONE
   * figure out how best to solve it - which took a while
-  
 * 1/6/16
   * get canvas to move a tile - DONE!
   * translate e.pagex/y to tiles - DONE!
@@ -69,7 +67,7 @@ I obviously had the most trouble with the solving algorithm. The sources that I 
     * intro when you click a radio it drives the global state - DONE
     * When you hit looks good it closes on intro modal - DONE
     * show something when you hit solve "try again" - DONE
-    * show something when you win "you did it in 5 moves!" -DONE
+    * show something when you win "you did it in 5 moves!" - DONE
     * show something when solve borks - DONE
     * if solved or moved in 1 step/move say step/move not steps/moves - DONE
 * 1/11/16
