@@ -7,7 +7,6 @@
  *
  * @author choshun.snyder@gmail.com (Choshun Snyder)
  */
-
 require('./puzzle-core.scss');
 
 import App from './components/app';
