@@ -1,5 +1,9 @@
-/*
+/**
  * @class PuzzleSelect
+ *
+ * Template maker for puzzle choose
+ *
+ * @author choshun.snyder@gmail.com (Choshun Snyder)
  */
 class PuzzleSelect {
   constructor(globalState) {
@@ -10,6 +14,9 @@ class PuzzleSelect {
     this._images = this._getImages(this.state.canvas);
   }
 
+  /**
+   * Puts puzzle images on page.
+   */
   render() {
     var section = document.createElement('section'),
         html = `
@@ -25,6 +32,10 @@ class PuzzleSelect {
     this.state.appElement.appendChild(section);    
   }
 
+  /**
+   * Gets canvas images from app.state.
+   * @param {Object} canvasImages canvasImages
+   */
   _getImages(canvasImages) {
     var i,
         images = [];
