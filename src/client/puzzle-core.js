@@ -39,15 +39,15 @@ import Solver from './components/solver';
       ],
       shuffle: [
         {
-          name: 'A little - 15',
+          name: 'A little - 15 shuffles',
           value: 15
         },
         {
-          name: 'An amount - 30',
+          name: 'An amount - 30 shuffles',
           value: 30
         },
         {
-          name: 'The limit at which my solver consistently works - 50',
+          name: 'Take it to the limit! - 50 shuffles',
           value: 50
         },
       ]
@@ -353,6 +353,8 @@ import Solver from './components/solver';
       var solveInterval,
           moveCount = 0;
       
+      solver.steps = 0;
+
       hideButtons();
       solver.solve(app.state.grid, app.state.goalGrid, app.state.emptyTile);
       

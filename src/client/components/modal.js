@@ -68,7 +68,7 @@ class Modal {
    */
   renderError() {
     var html = `
-      <h1>I have failed you sempai</h1>
+      <h1>Uh oh, it seems you broke me - good job!</h1>
 
       <p>Try again?!?!?</p>
 
