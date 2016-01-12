@@ -1,11 +1,10 @@
 #Slider puzzle
 
 ##Getting started:
-```
-$ git clone https://github.com/choshun/slider-puzzle.git
-$ npm install
-$ npm start
-$ npm run webpack-watch
-```
-go to http://localhost:4000/
+
+1. $ git clone https://github.com/choshun/slider-puzzle.git
+2. $ npm install
+3. $ npm start
+4. $ npm run webpack-watch
+5. go to http://localhost:4000/
 
