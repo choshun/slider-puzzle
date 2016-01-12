@@ -1,28 +1,86 @@
-/*
- * @class PuzzleSelect
+/**
+ * @class Modal
+ *
+ * Template maker for modals
+ *
+ * @author choshun.snyder@gmail.com (Choshun Snyder)
  */
 class Modal {
   constructor(globalState) {
-    this.state = globalState || {};
-    this.puzzleConfig = this.state.puzzleConfig,
+    this.state = globalState.state || {};
+    this.puzzleConfig = this.state.puzzleConfig;
     this.modal;
-
-    this._shuffles = [ [ 'yes', true ], [ 'no', false ] ];
   }
 
-  // TODO if modal is there then just html the contents, else create
+  /**
+   * Puts modal on page.
+   * @param {String} contents html to inject.
+   * @param {String} type type of modal.
+   */
   _render(contents, type) {
-    var i,
-        puzzles,
-        section = document.createElement('section'),
-        html = contents;
+    if (this.modal === undefined) {
+      this.modal = document.createElement('section');
+    }
 
-    section.setAttribute('class', 'modal open ' + type);
-    this.modal = section;
-    section.innerHTML = contents;
-    this.state.appElement.appendChild(section);
+    this.modal.setAttribute('class', 'modal _open ' + type);
+    this.modal.innerHTML = contents;
+    this.state.appElement.appendChild(this.modal);
   }
 
+  /**
+   * Puts "you won!" modal on page.
+   * @param {Number} steps steps it took for you to totes pwn.
+   */
+  renderWinning(steps) {
+    var html = `
+      <h1>A winner is you!</h1>
+
+      <p>You did it in an astonishing ${steps} ${steps > 1 ? 'steps' : 'step'}.</p>
+
+      <p>Try again?!?!?</p>
+
+      <button id="retry" class="button retry-button in-modal">RETRY</button>
+    `;
+
+    this._render(html, 'modal-solved');
+  }
+
+  /**
+   * Puts solved for you modal on page.
+   * @param {Number} solutionLength steps it took for solver to solve.
+   */
+  renderSolved(solutionLength) {
+    var html = `
+      <h1>You were so close!</h1>
+
+      <p>It took us ${solutionLength} ${solutionLength > 1 ? 'moves' : 'move'} to solve</p>
+
+      <p>Try again?!?!?</p>
+
+      <button id="retry" class="button retry-button in-modal">RETRY</button>
+    `;
+
+    this._render(html, 'modal-solved');
+  }
+
+  /**
+   * When solver.solve dies.
+   */
+  renderError() {
+    var html = `
+      <h1>I have failed you sempai</h1>
+
+      <p>Try again?!?!?</p>
+
+      <button id="retry" class="button retry-button in-modal">RETRY</button>
+    `;
+
+    this._render(html, 'modal-solved');
+  }
+
+  /**
+   * Render configuration modal for your puzzles
+   */
   renderIntro() {
     var sizeMaps = this._getMap(this.puzzleConfig.size),
         shuffleMaps = this._getMap(this.puzzleConfig.shuffle);
@@ -66,12 +124,21 @@ class Modal {
     this._render(html, 'intro');
   }
 
-  _seeIfChecked(size, initValue) {
-    var matchesInit = (size[0][1] === this.state[initValue]);
+  /**
+   * Sees if template field matches init state value.
+   * @param {Map} item config items
+   * @param {String} initValue initial value key to check
+   */
+  _seeIfChecked(item, initValue) {
+    var matchesInit = (item[0][1] === this.state[initValue]);
 
     return (matchesInit) ? 'checked=checked' : '';
   }
 
+  /**
+   * Creates an array that gets coerced into a map for looping
+   * @param {Object} object object I'm "mapping"
+   */
   _getMap(object) {
     var i,
         key,
