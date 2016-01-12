@@ -48,7 +48,7 @@ class App {
   }
 
   /**
-   * Given an empty tile and a grid return what
+   * Given an empty tile and a grid, return what
    * moves are allowable.
    * ie if the upper-right tile is empty on a 3*3 grid
    * - the 2, 0 coordinate,

@@ -1,15 +1,22 @@
-/*
- * @class PuzzleSelect
+/**
+ * @class Modal
+ *
+ * Template maker for modals
+ *
+ * @author choshun.snyder@gmail.com (Choshun Snyder)
  */
 class Modal {
   constructor(globalState) {
     this.state = globalState.state || {};
     this.puzzleConfig = this.state.puzzleConfig;
     this.modal;
-
-    this._shuffles = [ [ 'yes', true ], [ 'no', false ] ];
   }
 
+  /**
+   * Puts modal on page.
+   * @param {String} contents html to inject.
+   * @param {String} type type of modal.
+   */
   _render(contents, type) {
     if (this.modal === undefined) {
       this.modal = document.createElement('section');
@@ -20,6 +27,10 @@ class Modal {
     this.state.appElement.appendChild(this.modal);
   }
 
+  /**
+   * Puts "you won!" modal on page.
+   * @param {Number} steps steps it took for you to totes pwn.
+   */
   renderWinning(steps) {
     var html = `
       <h1>A winner is you!</h1>
@@ -34,6 +45,10 @@ class Modal {
     this._render(html, 'modal-solved');
   }
 
+  /**
+   * Puts solved for you modal on page.
+   * @param {Number} solutionLength steps it took for solver to solve.
+   */
   renderSolved(solutionLength) {
     var html = `
       <h1>You were so close!</h1>
@@ -48,7 +63,10 @@ class Modal {
     this._render(html, 'modal-solved');
   }
 
-  renderError(solutionLength) {
+  /**
+   * When solver.solve dies.
+   */
+  renderError() {
     var html = `
       <h1>I have failed you sempai</h1>
 
@@ -60,6 +78,9 @@ class Modal {
     this._render(html, 'modal-solved');
   }
 
+  /**
+   * Render configuration modal for your puzzles
+   */
   renderIntro() {
     var sizeMaps = this._getMap(this.puzzleConfig.size),
         shuffleMaps = this._getMap(this.puzzleConfig.shuffle);
@@ -103,12 +124,21 @@ class Modal {
     this._render(html, 'intro');
   }
 
-  _seeIfChecked(size, initValue) {
-    var matchesInit = (size[0][1] === this.state[initValue]);
+  /**
+   * Sees if template field matches init state value.
+   * @param {Map} item config items
+   * @param {String} initValue initial value key to check
+   */
+  _seeIfChecked(item, initValue) {
+    var matchesInit = (item[0][1] === this.state[initValue]);
 
     return (matchesInit) ? 'checked=checked' : '';
   }
 
+  /**
+   * Creates an array that gets coerced into a map for looping
+   * @param {Object} object object I'm "mapping"
+   */
   _getMap(object) {
     var i,
         key,
