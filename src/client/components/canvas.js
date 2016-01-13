@@ -243,7 +243,7 @@ class Canvas {
   }
 
   /**
-   * Gets the tile clicked associated with its origina position.
+   * Gets the tile clicked associated with its original position.
    * @param {Number} offsetY offsetY of the canvas to viewport
    * @param {Number} offsetX offsetX of the canvas to viewport
    *
@@ -283,7 +283,6 @@ class Canvas {
 
   /**
    * Used for canvas.moveTile,
-   * the index of an array in an array.
    * @param {Array} tile tile to be moved
    *  (see canvas.getTile)
    * @param {Array} moves allowable moves

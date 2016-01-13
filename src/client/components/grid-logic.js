@@ -42,7 +42,7 @@ class GridLogic {
 
   /**
    * Creates a grid with an empty tile.
-   * @param {String} gridSize size of puzzle.
+   * @param {Number} gridSize size of puzzle.
    */
   _createGrid(gridSize) {
     var i,
@@ -84,11 +84,11 @@ class GridLogic {
   }
 
   /**
-   * When sfhuffling it'll move grid tiles
+   * When shuffling it'll move grid tiles
    * to a random allowable grid.
    * @param {Array} grid grid
    * @param {Array} allowableMoves allowable moves
-   *  (see app.getAllowable moves)
+   *  (see app.getAllowableMoves)
    *
    * @return {Array} grid grid
    */
@@ -99,8 +99,6 @@ class GridLogic {
         tile = choice[2],
         fromPosition = grid[tile];
 
-    // keep track so we don't move back and cancel
-    // last move
     this.lastDirection = direction;
 
     // switch emptyTile and moved tile [x, y]
